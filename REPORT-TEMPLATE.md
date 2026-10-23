@@ -135,6 +135,21 @@ One block per finding (copy as needed):
 | Impact | An authenticated attacker can access private notes belonging to other users by manipulating note IDs, resulting in unauthorized disclosure of sensitive information. |
 | Evidence | [before-own-note](evidence/F-01-IDOR/before-own-note.png) and [before-admin-note](evidence/F-01-IDOR/before-admin-note.png) |
 
+
+
+### Finding F-02 — SQL Injection
+
+| Field | Value |
+|---|---|
+| CWE | CWE-89: Improper Neutralization of Special Elements used in an SQL Command |
+| OWASP 2025 | A05:2025 – Injection |
+| Severity | Critical |
+| Location | `app.py` — `POST /login` and `GET /search` |
+| Reproduction | **Login:** 1. Open `http://localhost:8080/`. 2. Enter `' OR 1=1 -- ` as the username and `wrongpassword` as the password. 3. Submit the form. 4. Observe that authentication succeeds despite the incorrect credentials. **Search:** 1. Log in as `alice`. 2. Navigate to `/search`. 3. Enter `' OR 1=1 -- ` as the search term. 4. Observe that notes belonging to other users, including Admin, appear in the results. |
+| Impact | An attacker can bypass authentication and access notes belonging to other users, resulting in unauthorized access and disclosure of sensitive information. |
+| Evidence | [Before Login SQLi](evidence/F-02-SQLi/before-login-sqli.png) / [Before Search SQLi](evidence/F-02-SQLi/before-search-sqli.png) |
+
+
 ---
 
 ## 5. Remediation  *(25 pts)*
@@ -198,6 +213,38 @@ After applying the fix and rebuilding the application, the endpoint was tested a
 - [after-admin-note](evidence/F-01-IDOR/after-admin-note.png)
 
 **Result:** The IDOR vulnerability was successfully remediated, and unauthorized note access was prevented.
+
+
+
+### Fix for F-02
+
+**Before/After — Login**
+
+```diff
+- q = "SELECT * FROM users WHERE username = '%s' AND password = '%s'" % (
+-     username, hashlib.md5((password or "").encode()).hexdigest())
+- row = con.execute(q).fetchone()
++ q = "SELECT * FROM users WHERE username = ? AND password = ?"
++ row = con.execute(
++     q,
++     (username, hashlib.md5((password or "").encode()).hexdigest())
++ ).fetchone()
+```
+
+**Before/After — Search**
+
+```diff
+- q = "SELECT id,title,body FROM notes WHERE owner='%s' AND body LIKE '%%%s%%'" % (user, term)
+- rows = con.execute(q).fetchall()
++ q = "SELECT id,title,body FROM notes WHERE owner = ? AND body LIKE ?"
++ rows = con.execute(q, (user, f"%{term}%")).fetchall()
+```
+
+- **Why this fixes it:** Parameterized queries separate user input from SQL commands. User-supplied values are treated as data rather than executable SQL, preventing authentication bypass and unauthorized data retrieval through SQL Injection.
+- **Commit:** `86f0990`-`fix(F-02): prevent SQL injection in login and search`
+- **Proof the exploit now fails:** The original login injection payload returns `login failed` (HTTP 401), while the search injection returns no unauthorized notes.
+  - [After Login SQLi](evidence/F-02-SQLi/after-login-sqli.png)
+  - [After Search SQLi](evidence/F-02-SQLi/after-search-sqli.png)
 
 ---
 
