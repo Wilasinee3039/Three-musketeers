@@ -650,9 +650,9 @@ References accessed on October 23, 2026.
 
 | Team Member | Responsibilities |
 |---|---|
-| Sai Seng Main | Project setup, Supply-Chain Hardening, SBOM generation, Cosign signing and verification, SLSA provenance, and supply-chain documentation. |
-| Wilasinee Mangkorn | Vulnerability assessment and remediation for F-01 (IDOR), F-02 (SQL Injection), F-03 (OS Command Injection), and F-04 (Mass Assignment / Privilege Escalation), including evidence collection, report documentation, and Git integration. | |
-| Pirisa Kitichai | Threat Modeling (System Scope, DFD, STRIDE Analysis), Security CI Pipeline implementation and testing, README documentation, and CI failure evidence collection. |
+| Sai Seng Main | Project setup (starter app and report template); Supply-Chain Hardening: SBOM generation, Cosign signing and verification, supply-chain CI workflow and SLSA provenance (§6); additional security hardening found by the CI: password hashing upgrade, debug mode, dependency upgrades and Dockerfile hardening (§5); Conclusion & Reflection (§8); appendix updates. |
+| Wilasinee Mangkorn | Repository setup; vulnerability assessment and remediation for F-01 (IDOR), F-02 (SQL Injection), F-03 (OS Command Injection), F-04 (Mass Assignment) and F-05 (Stored XSS), including code fixes, evidence collection and §4–§5 documentation. |
+| Pirisa Kitichai | Threat Modeling (System Scope, DFD, STRIDE analysis); Security CI pipeline implementation and testing, with failed- and successful-build evidence (§7); Executive Summary (§1); README, team details and appendix documentation. |
 
 ### D. Supporting Evidence
 
