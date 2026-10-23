@@ -208,10 +208,20 @@ def admin():
 def export():
     if not current_user():
         return "auth required", 401
+
     fmt = request.args.get("fmt", "txt")
-    # convenience "export" feature
-    out = subprocess.run("echo exporting notes as " + fmt, shell=True,
-                         capture_output=True, text=True)
+
+    allowed_formats = {"txt", "csv", "json"}
+    if fmt not in allowed_formats:
+        return "invalid export format", 400
+
+    out = subprocess.run(
+        ["echo", "exporting notes as", fmt],
+        capture_output=True,
+        text=True,
+        check=True
+    )
+
     return "<pre>%s</pre>" % out.stdout
 
 

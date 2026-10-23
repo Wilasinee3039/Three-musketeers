@@ -20,7 +20,9 @@
 
 | Tool | How it was used |
 |---|---|
-| Claude (Claude Code) | §6 Supply-Chain Hardening: ran Syft to generate the CycloneDX SBOM, signed and verified the image with Cosign, wrote the `supply-chain.yml` GitHub Actions workflow (keyless signing, SBOM attestation, SLSA provenance), and drafted §6 including the SLSA self-assessment. Also explained the concepts and helped resolve git merge conflicts. All output was reviewed by the team. |
+| Claude (Claude Code) | §6: generated the SBOM, signed the image, wrote the supply-chain CI workflow, and drafted the section. |
+| ChatGPT | Searching for information. |
+| Gemini | Understanding the project and what we needed to do. |
 
 ---
 
@@ -150,6 +152,20 @@ One block per finding (copy as needed):
 | Evidence | [Before Login SQLi](evidence/F-02-SQLi/before-login-sqli.png) / [Before Search SQLi](evidence/F-02-SQLi/before-search-sqli.png) |
 
 
+
+### Finding F-03 — Command Injection via /export
+
+| Field | Value |
+|---|---|
+| CWE | CWE-78: Improper Neutralization of Special Elements used in an OS Command |
+| OWASP 2025 | A05:2025 – Injection |
+| Severity | Critical |
+| Location | `app.py` — `GET /export` |
+| Reproduction | 1. Log in as `alice` using `alicepw`. 2. Open `/export?fmt=txt` and observe `exporting notes as txt`. 3. Open `/export?fmt=txt%3Becho%20F03_INJECTION_TEST`. 4. Observe that `F03_INJECTION_TEST` appears on a separate line, proving that the injected shell command was executed. |
+| Impact | An authenticated attacker could execute arbitrary operating-system commands through the `fmt` parameter, potentially compromising the application container and exposing sensitive data. |
+| Evidence | [Before – Normal Export](evidence/F-03-Command-Injection/before-export-normal.png) / [Before – Command Injection](evidence/F-03-Command-Injection/before-export-command-injection.png) |
+
+
 ---
 
 ## 5. Remediation  *(25 pts)*
@@ -209,10 +225,9 @@ After applying the fix and rebuilding the application, the endpoint was tested a
 - `/api/notes/2` → Returns `{"error":"not found"}` instead of exposing the Admin's private note.
 
 **Evidence:**
-- [after-own-note](evidence/F-01-IDOR/after-own-note.png)
-- [after-admin-note](evidence/F-01-IDOR/after-admin-note.png)
+   - [after-own-note](evidence/F-01-IDOR/after-own-note.png)
+   - [after-admin-note](evidence/F-01-IDOR/after-admin-note.png)
 
-**Result:** The IDOR vulnerability was successfully remediated, and unauthorized note access was prevented.
 
 
 
@@ -245,6 +260,34 @@ After applying the fix and rebuilding the application, the endpoint was tested a
 - **Proof the exploit now fails:** The original login injection payload returns `login failed` (HTTP 401), while the search injection returns no unauthorized notes.
   - [After Login SQLi](evidence/F-02-SQLi/after-login-sqli.png)
   - [After Search SQLi](evidence/F-02-SQLi/after-search-sqli.png)
+
+
+
+### Fix for F-03
+
+**Before/After Code:**
+
+```diff
+- out = subprocess.run("echo exporting notes as " + fmt, shell=True,
+-                      capture_output=True, text=True)
++ allowed_formats = {"txt", "csv", "json"}
++ if fmt not in allowed_formats:
++     return "invalid export format", 400
++
++ out = subprocess.run(
++     ["echo", "exporting notes as", fmt],
++     capture_output=True,
++     text=True,
++     check=True
++ )
+```
+
+- **Why this fixes it:** The fix removes `shell=True` to prevent shell command execution and uses a list of arguments instead of concatenating user input into a command string. A strict whitelist only allows `txt`, `csv`, and `json` as valid export formats, preventing command injection through the `fmt` parameter.
+- **Commit:** `2babb04`-`fix(F-03): prevent command injection in export`
+- **Proof the exploit now fails:** The original payload `txt;echo F03_INJECTION_TEST` is rejected with `invalid export format`, while normal export functionality remains operational. 
+   - [After Fix – Command Injection](evidence/F-03-Command-Injection/after-export-command-injection.png) 
+   - [After Fix – Normal Export](evidence/F-03-Command-Injection/after-export-normal.png)
+
 
 ---
 
