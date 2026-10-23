@@ -22,7 +22,7 @@ This project focuses on analyzing security threats, identifying vulnerabilities,
 - [x] Team Formation
 - [x] Fork Repository
 - [x] Threat Modeling (DFD & STRIDE)
-- [ ] Vulnerability Assessment
-- [ ] Security Remediation
-- [ ] Security CI & Supply-Chain Hardening
+- [x] Vulnerability Assessment
+- [x] Security Remediation
+- [x] Security CI & Supply-Chain Hardening
 - [ ] Final Report & Demo

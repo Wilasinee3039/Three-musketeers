@@ -615,7 +615,13 @@ We assessed NoteVault and found five vulnerabilities: two Critical (F-02 SQL Inj
 | GitHub Actions | Automated security CI pipeline |
 | CycloneDX | Software Bill of Materials (SBOM) generation |
 | Cosign | Release artifact signing and verification |
+| Syft | Generating the CycloneDX SBOM from the container image |
+| Bandit | Static analysis (SAST) of the Python source in the Security CI |
+| pip-audit | Dependency vulnerability scanning (SCA) in the Security CI |
+| Gitleaks | Secret scanning of the Git history in the Security CI |
 | ChatGPT | Technical explanations, security analysis guidance, and report drafting assistance |
+| Gemini | Understanding the project and its requirements |
+| Claude (Claude Code) | SBOM generation, Cosign signing, supply-chain CI workflow, and §6 drafting |
 
 ### B. References
 
@@ -625,6 +631,9 @@ The following sources support the weakness classifications and remediation appro
 |---|---|---|---|
 | F-01: IDOR/BOLA | MITRE. [CWE-639: Authorization Bypass Through User-Controlled Key](https://cwe.mitre.org/data/definitions/639.html) | OWASP. [A01:2025 - Broken Access Control](https://top10.owasp.org/2025/A01_2025-Broken_Access_Control/) | A user could change the note ID to retrieve another user's note. The remediation checks ownership in the database query. |
 | F-02: SQL Injection | MITRE. [CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')](https://cwe.mitre.org/data/definitions/89.html) | OWASP. [A05:2025 - Injection](https://top10.owasp.org/2025/A05_2025-Injection/) | Login and search queries previously incorporated user input into SQL text. Parameterized queries separate input values from SQL commands. |
+| F-03: Command Injection | MITRE. [CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')](https://cwe.mitre.org/data/definitions/78.html) | OWASP. [A05:2025 - Injection](https://top10.owasp.org/2025/A05_2025-Injection/) | The `fmt` parameter of `/export` was passed to a shell command. The remediation allow-lists the format and runs the command without a shell. |
+| F-04: Mass Assignment | MITRE. [CWE-915: Improperly Controlled Modification of Dynamically-Determined Object Attributes](https://cwe.mitre.org/data/definitions/915.html) | OWASP. [A01:2025 - Broken Access Control](https://top10.owasp.org/2025/A01_2025-Broken_Access_Control/) | Registration accepted a user-supplied `role`, allowing self-promotion to admin. The remediation always assigns the `user` role on the server side. |
+| F-05: Stored XSS | MITRE. [CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')](https://cwe.mitre.org/data/definitions/79.html) | OWASP. [A05:2025 - Injection](https://top10.owasp.org/2025/A05_2025-Injection/) | Note titles and bodies were rendered as raw HTML. The remediation HTML-escapes them before rendering. |
 
 Additional references for threat modeling, API security, and supply-chain hardening:
 
@@ -649,7 +658,7 @@ References accessed on October 23, 2026.
 
 - Data Flow Diagram: `img/Data Flow Diagram.png`
 - Vulnerability Evidence: `evidence/`
-- SBOM: `supply-chain/sbom.json`
+- SBOM: `sbom.json`
 - Security CI Workflow: `.github/workflows/security.yml`
 
 Additional evidence and remediation commit references will be updated as the project progresses.
