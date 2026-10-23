@@ -111,7 +111,7 @@ def home():
 def register():
     username = request.form.get("username") or (request.json or {}).get("username")
     password = request.form.get("password") or (request.json or {}).get("password")
-    role = request.form.get("role") or (request.json or {}).get("role") or "user"
+    role = "user"
     con = db()
     con.execute("INSERT INTO users (username, password, role) VALUES (?,?,?)",
                 (username, hashlib.md5(password.encode()).hexdigest(), role))
