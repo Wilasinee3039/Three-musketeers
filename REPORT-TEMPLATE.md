@@ -488,8 +488,28 @@ After remediation, rerun the same workflow and retain the passing run as additio
 ---
 
 ## 8. Conclusion & Reflection  *(5 pts — clarity)*
-- Residual risks and what you'd harden next.
-- Lessons learned.
+
+We assessed NoteVault and found five vulnerabilities: two Critical (F-02 SQL Injection, F-03 Command Injection) and three High (F-01 IDOR, F-04 Mass Assignment, F-05 Stored XSS). All five are fixed and re-tested. We also replaced MD5 password hashing with salted scrypt, disabled Flask debug mode, upgraded every vulnerable dependency, and hardened the Docker image (slim pinned base, non-root user, no baked secret). The Security CI now passes all three gates (Bandit, pip-audit, Gitleaks). Every release image is built in CI, signed with Cosign, shipped with a CycloneDX SBOM (490 → 109 components), and carries SLSA Level 2 provenance.
+
+### Residual risks and what we would harden next
+
+| Residual risk | Next step |
+|---|---|
+| The JWT signing secret is hard-coded in `app.py` (`SECRET`). | Load it from an environment variable or secret manager and rotate it. |
+| `jwt.decode` still lists `"none"` as an allowed algorithm. PyJWT 2.x rejects unsigned tokens when a key is given (a forged admin token now returns 403), so this is not exploitable, but it relies on library behaviour. | Allow only `HS256`. |
+| The session cookie has no `HttpOnly`, `Secure` or `SameSite` flags, and forms have no CSRF protection. | Set the cookie flags and add CSRF tokens (e.g. Flask-WTF). |
+| `/login` has no rate limiting or lockout. | Add rate limiting to slow down brute-force attacks. |
+| `/admin` returns every user's password hash. | Return only the fields the admin view needs. |
+| Seeded demo accounts use weak passwords (`admin123`). | Remove seed users from production builds. |
+| Supply chain is SLSA Level 2, and transitive dependencies are not hash-pinned. | Use `pip install --require-hashes` and the SLSA reusable workflow for Level 3. |
+
+### Lessons learned
+
+- **Small mistakes cause big impact.** One missing ownership check (F-01) or one string-built query (F-02) was enough to expose the admin's secrets. Parameterized queries, output escaping and server-side authorization should be the default, not an afterthought.
+- **Automated checks catch what reviews miss.** The CI found the weak MD5 hashing, debug mode and dozens of known dependency vulnerabilities that we had not listed in our manual findings. A failing pipeline is useful evidence, not a problem.
+- **Upgrades need testing.** Moving to Flask 3 / Werkzeug 3 broke form logins (`request.json` now returns 415) until we changed the code, so every security upgrade must be re-tested.
+- **The build is part of the attack surface.** Switching to a slim base image removed 78% of the image's components, and signing plus provenance lets anyone verify that the image came from our repository and was not tampered with.
+- **Team coordination matters.** Working on the same `main` branch caused several merge conflicts; short-lived feature branches and pull requests would have made integration smoother.
 
 ---
 
