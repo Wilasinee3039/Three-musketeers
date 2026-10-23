@@ -166,6 +166,23 @@ One block per finding (copy as needed):
 | Evidence | [Before – Normal Export](evidence/F-03-Command-Injection/before-export-normal.png) / [Before – Command Injection](evidence/F-03-Command-Injection/before-export-command-injection.png) |
 
 
+
+
+### Finding F-04 — Mass Assignment in Registration
+
+| Field | Value |
+|---|---|
+| CWE | CWE-915: Improperly Controlled Modification of Dynamically-Determined Object Attributes |
+| OWASP 2025 | A01:2025 – Broken Access Control |
+| Severity | High |
+| Location | `app.py` — `POST /register` (role assignment) |
+| Reproduction | 1. Send a POST request to `/register` with `username=f04_test_admin`, `password=test12345`, and `role=admin`. 2. The application responds with HTTP 302, indicating registration was processed. 3. Query the SQLite database at `/tmp/notevault.db` for the newly created account. 4. Observe that the account has the `admin` role despite being created through public registration. |
+| Impact | An unauthenticated attacker can create an account with administrator privileges by supplying `role=admin` during registration. This allows privilege escalation and potentially unauthorized access to administrative functionality and sensitive user data. |
+| Evidence | [Before Fix – Admin Role Assignment](evidence/F-04-Mass-Assignment/before-register-admin.png) |
+
+
+
+
 ---
 
 ## 5. Remediation  *(25 pts)*
@@ -287,6 +304,27 @@ After applying the fix and rebuilding the application, the endpoint was tested a
 - **Proof the exploit now fails:** The original payload `txt;echo F03_INJECTION_TEST` is rejected with `invalid export format`, while normal export functionality remains operational. 
    - [After Fix – Command Injection](evidence/F-03-Command-Injection/after-export-command-injection.png) 
    - [After Fix – Normal Export](evidence/F-03-Command-Injection/after-export-normal.png)
+
+
+
+
+### Fix for F-04
+
+**Before/After Code:**
+
+```diff
+- role = request.form.get("role") or (request.json or {}).get("role") or "user"
++ role = "user"
+```
+
+- **Why this fixes it:** The application no longer accepts the `role` value from user-controlled registration data. Every newly registered account is assigned the `user` role, preventing attackers from granting themselves administrator privileges through mass assignment.
+- **Commit:** `474a0f5`-`fix(F-04): prevent mass assignment in registration`
+- **Proof the exploit now fails:** The same registration request containing `role=admin` was submitted after remediation. The application created the account with the `user` role instead of `admin`, confirming that privilege escalation through the registration parameter is prevented. 
+   - [After Fix – User Role Enforced](evidence/F-04-Mass-Assignment/after-register-admin.png)
+
+
+
+
 
 
 ---
