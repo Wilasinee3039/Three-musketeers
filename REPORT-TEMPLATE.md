@@ -228,21 +228,18 @@ These checks do not block merging automatically: repository branch protection or
 
 ### 7.2 Failed-build evidence
 
-**Pending an actual GitHub Actions run.** Do not treat this workflow definition as proof that a build has run.
+![GitHub Actions Security CI failing on HIGH severity Bandit findings](./img/security-ci-failed.png)
 
-Local verification on October 23, 2026 with Python 3.12.2 and Bandit 1.8.3 returned exit code **1** and reported **6 HIGH findings**: four B324 weak-MD5 findings, B602 shell execution at `app.py:202`, and B201 Flask debug mode at `app.py:209`. This confirms the local SAST gate; it does not replace the required GitHub Actions screenshot.
+**Figure 7.1:** GitHub Actions ran the **SAST - Bandit (HIGH gate)** job and reported **6 HIGH severity findings**. The screenshot shows B201 (`flask_debug_true`) at `app.py:209`, where `debug=True` enables the Flask debugger. The scan ended with **Process completed with exit code 1**, causing the job to fail. This demonstrates that the HIGH severity security gate works as configured.
 
-The local pip-audit 2.9.0 run also returned exit code **1**, reporting **47 known vulnerabilities in 7 packages**, including transitive dependencies. Counts may change as the advisory database changes. Gitleaks has not been run locally because access to the Docker engine is restricted; verify its result in GitHub Actions.
+The job list also shows that the SCA job failed and the Gitleaks secret-scanning job passed. The SCA failure reason must be checked in its own log; this screenshot only shows the detailed SAST findings.
 
-1. Commit and push `.github/workflows/security.yml` to GitHub.
-2. Open **Actions → Security CI**, then open the run for that commit.
-3. Open **SAST - Bandit (HIGH gate)** and expand **Scan Python source and fail on HIGH findings**.
-4. Capture the HIGH finding, its file/line, the non-zero exit code, and the failed job/run status. For the current starter code, `subprocess.run(..., shell=True)` in `/export` is a candidate; confirm the actual scanner output before claiming a finding.
-5. Save the screenshot as `img/security-ci-failed.png`, then add the image and the real run URL below. If a job fails during installation or setup, that is not evidence of the vulnerability gate.
+- **Failed run URL:** (https://github.com/Wilasinee3039/Three-musketeers/actions/runs/39925428245/job/120320512106)
+- **Screenshot:** [`img/security-ci-failed.png`](./img/security-ci-failed.png)
 
-- **Failed run URL:** pending
-- **Commit tested:** pending
-- **Screenshot:** pending (`img/security-ci-failed.png`)
+Local verification on October 23, 2026 with Python 3.12.2 and Bandit 1.8.3 also returned exit code **1** and reported **6 HIGH findings**: four B324 weak-MD5 findings, B602 shell execution at `app.py:202`, and B201 Flask debug mode at `app.py:209`.
+
+The local pip-audit 2.9.0 run returned exit code **1**, reporting **47 known vulnerabilities in 7 packages**, including transitive dependencies. Counts may change as the advisory database changes.
 
 After remediation, rerun the same workflow and retain the passing run as additional evidence.
 
