@@ -127,7 +127,7 @@ One block per finding (copy as needed):
 | Impact | what an attacker gains |
 | Evidence | screenshot / request-response |
 
-
+---
 ### Finding F-01 — Insecure Direct Object Reference (IDOR/BOLA)
 
 | Field | Value |
@@ -141,7 +141,7 @@ One block per finding (copy as needed):
 | Evidence | [before-own-note](evidence/F-01-IDOR/before-own-note.png) and [before-admin-note](evidence/F-01-IDOR/before-admin-note.png) |
 
 
-
+---
 ### Finding F-02 — SQL Injection
 
 | Field | Value |
@@ -155,7 +155,7 @@ One block per finding (copy as needed):
 | Evidence | [Before Login SQLi](evidence/F-02-SQLi/before-login-sqli.png) / [Before Search SQLi](evidence/F-02-SQLi/before-search-sqli.png) |
 
 
-
+---
 ### Finding F-03 — Command Injection via /export
 
 | Field | Value |
@@ -170,7 +170,7 @@ One block per finding (copy as needed):
 
 
 
-
+---
 ### Finding F-04 — Mass Assignment in Registration
 
 | Field | Value |
@@ -183,6 +183,19 @@ One block per finding (copy as needed):
 | Impact | An unauthenticated attacker can create an account with administrator privileges by supplying `role=admin` during registration. This allows privilege escalation and potentially unauthorized access to administrative functionality and sensitive user data. |
 | Evidence | [Before Fix – Admin Role Assignment](evidence/F-04-Mass-Assignment/before-register-admin.png) |
 
+---
+
+### Finding F-05 — Stored Cross-Site Scripting (XSS)
+
+| Field | Value |
+|---|---|
+| CWE | CWE-79: Improper Neutralization of Input During Web Page Generation |
+| OWASP 2025 | A05:2025 – Injection |
+| Severity | High |
+| Location | `app.py` — `GET /` (Home) and `GET /search` |
+| Reproduction | 1. Log in as `alice` using `alicepw`. 2. Create a note with title `F05 XSS Test` and body `<img src=x onerror=alert('F05_XSS_TEST')>`. 3. Return to the Home page and observe the JavaScript alert `F05_XSS_TEST`. 4. Search for `F05_XSS_TEST` and observe the same alert on the Search results page. |
+| Impact | An attacker can store malicious JavaScript in a note that executes when the note is rendered in a user's browser. This could enable unauthorized actions, manipulation of displayed content, or exposure of sensitive information accessible to the affected page. |
+| Evidence | [Before Fix – Home XSS](evidence/F-05-Stored-XSS/before-home-xss.png) / [Before Fix – Search XSS](evidence/F-05-Stored-XSS/before-search-xss.png) |
 
 
 
@@ -202,7 +215,7 @@ Per finding: the fix, **before/after** code, and the commit that implements it.
 - **Proof the exploit now fails:** (screenshot)
 
 
-
+---
 ### Fix for F-01 — Insecure Direct Object Reference (IDOR/BOLA)
 
 **Before/After Code:**
@@ -250,7 +263,7 @@ After applying the fix and rebuilding the application, the endpoint was tested a
 
 
 
-
+---
 ### Fix for F-02
 
 **Before/After — Login**
@@ -282,7 +295,7 @@ After applying the fix and rebuilding the application, the endpoint was tested a
   - [After Search SQLi](evidence/F-02-SQLi/after-search-sqli.png)
 
 
-
+---
 ### Fix for F-03
 
 **Before/After Code:**
@@ -310,7 +323,7 @@ After applying the fix and rebuilding the application, the endpoint was tested a
 
 
 
-
+---
 ### Fix for F-04
 
 **Before/After Code:**
@@ -326,8 +339,47 @@ After applying the fix and rebuilding the application, the endpoint was tested a
    - [After Fix – User Role Enforced](evidence/F-04-Mass-Assignment/after-register-admin.png)
 
 
+---
+### Fix for F-05
 
+**Before/After Code:**
 
+```diff
++ from markupsafe import escape
+```
+
+**Home (`/`)**
+
+```diff
+- notes_html = "".join(
+-     "<li>#%d <b>%s</b>: %s</li>" % (r["id"], r["title"], r["body"]) for r in rows)
++ notes_html = "".join(
++     "<li>#%d <b>%s</b>: %s</li>" %
++     (r["id"], escape(r["title"]), escape(r["body"]))
++     for r in rows
++ )
+```
+
+**Search (`/search`)**
+
+```diff
+- return render_template_string("<a href=/>back</a><ul>" +
+-     "".join("<li>%s: %s</li>" % (r["title"], r["body"]) for r in rows) + "</ul>")
++ return render_template_string(
++     "<a href=/>back</a><ul>" +
++     "".join(
++         "<li>%s: %s</li>" % (escape(r["title"]), escape(r["body"]))
++         for r in rows
++     ) +
++     "</ul>"
++ )
+```
+
+- **Why this fixes it:** The application now uses `markupsafe.escape()` to HTML-escape note titles and bodies before rendering them on the Home and Search pages. This ensures that user-controlled HTML and JavaScript payloads are displayed as text rather than interpreted and executed by the browser.
+- **Commit:** `bf24736`-`fix(F-05): prevent stored XSS in notes and search`
+- **Proof the exploit now fails:** After remediation, the original stored XSS payload `<img src=x onerror=alert('F05_XSS_TEST')>` was tested again on both pages. The payload was displayed as plain text, and no JavaScript alert appeared.
+  - [After Fix – Home XSS](evidence/F-05-Stored-XSS/after-home-xss.png)
+  - [After Fix – Search XSS](evidence/F-05-Stored-XSS/after-search-xss.png)
 
 
 ---
