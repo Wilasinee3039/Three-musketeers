@@ -18,6 +18,7 @@ import subprocess
 import jwt  # PyJWT
 from flask import Flask, request, jsonify, render_template_string, redirect, make_response
 from markupsafe import escape
+from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 DB = "/tmp/notevault.db"
@@ -66,8 +67,8 @@ def seed():
         "CREATE TABLE notes (id INTEGER PRIMARY KEY, owner TEXT, title TEXT, body TEXT);"
     )
     con.executemany("INSERT INTO users (username, password, role) VALUES (?,?,?)",
-                    [("alice", hashlib.md5(b"alicepw").hexdigest(), "user"),
-                     ("admin", hashlib.md5(b"admin123").hexdigest(), "admin")])
+                    [("alice", generate_password_hash("alicepw"), "user"),
+                     ("admin", generate_password_hash("admin123"), "admin")])
     con.executemany("INSERT INTO notes (owner, title, body) VALUES (?,?,?)",
                     [("alice", "groceries", "milk, eggs"),
                      ("admin", "infra", "prod db password is hunter2"),
@@ -113,12 +114,12 @@ def home():
 
 @app.route("/register", methods=["POST"])
 def register():
-    username = request.form.get("username") or (request.json or {}).get("username")
-    password = request.form.get("password") or (request.json or {}).get("password")
+    username = request.form.get("username") or (request.get_json(silent=True) or {}).get("username")
+    password = request.form.get("password") or (request.get_json(silent=True) or {}).get("password")
     role = "user"
     con = db()
     con.execute("INSERT INTO users (username, password, role) VALUES (?,?,?)",
-                (username, hashlib.md5(password.encode()).hexdigest(), role))
+                (username, generate_password_hash(password), role))
     con.commit()
     con.close()
     return redirect("/")
@@ -126,16 +127,12 @@ def register():
 
 @app.route("/login", methods=["POST"])
 def login():
-    username = request.form.get("username") or (request.json or {}).get("username")
-    password = request.form.get("password") or (request.json or {}).get("password")
+    username = request.form.get("username") or (request.get_json(silent=True) or {}).get("username")
+    password = request.form.get("password") or (request.get_json(silent=True) or {}).get("password")
     con = db()
-    q = "SELECT * FROM users WHERE username = ? AND password = ?"
-    row = con.execute(
-        q,
-        (username, hashlib.md5((password or "").encode()).hexdigest())
-    ).fetchone()
+    row = con.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
     con.close()
-    if not row:
+    if not row or not check_password_hash(row["password"], password or ""):
         return "login failed", 401
     tok = jwt.encode({"sub": username}, SECRET, algorithm="HS256")
     resp = make_response(redirect("/"))
@@ -236,4 +233,4 @@ def export():
 
 if __name__ == "__main__":
     seed()
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=os.environ.get("FLASK_DEBUG") == "1")
