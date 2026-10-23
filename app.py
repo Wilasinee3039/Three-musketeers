@@ -17,6 +17,7 @@ import subprocess
 
 import jwt  # PyJWT
 from flask import Flask, request, jsonify, render_template_string, redirect, make_response
+from markupsafe import escape
 
 app = Flask(__name__)
 DB = "/tmp/notevault.db"
@@ -102,7 +103,10 @@ def home():
         rows = con.execute("SELECT id,title,body FROM notes WHERE owner = ?", (user,)).fetchall()
         con.close()
         notes_html = "".join(
-            "<li>#%d <b>%s</b>: %s</li>" % (r["id"], r["title"], r["body"]) for r in rows)
+            "<li>#%d <b>%s</b>: %s</li>" %
+            (r["id"], escape(r["title"]), escape(r["body"]))
+            for r in rows
+        )
     return render_template_string(PAGE, user=user, is_admin=(user and role_of(user) == "admin"),
                                   notes_html=notes_html)
 
@@ -189,9 +193,14 @@ def search():
     q = "SELECT id,title,body FROM notes WHERE owner = ? AND body LIKE ?"
     rows = con.execute(q, (user, f"%{term}%")).fetchall()
     con.close()
-    return render_template_string("<a href=/>back</a><ul>" +
-        "".join("<li>%s: %s</li>" % (r["title"], r["body"]) for r in rows) + "</ul>")
-
+    return render_template_string(
+         "<a href=/>back</a><ul>" +
+        "".join(
+             "<li>%s: %s</li>" % (escape(r["title"]), escape(r["body"]))
+            for r in rows
+        ) +
+        "</ul>"
+    )
 
 @app.route("/admin")
 def admin():
