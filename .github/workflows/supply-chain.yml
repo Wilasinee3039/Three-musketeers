@@ -45,6 +45,8 @@ jobs:
 
       - name: Generate CycloneDX SBOM
         uses: anchore/sbom-action@v0
+        env:
+          SYFT_FILE_METADATA_SELECTION: none  # packages only, no per-file entries
         with:
           image: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}
           format: cyclonedx-json
@@ -88,7 +90,12 @@ jobs:
             echo '```'
             echo "## gh attestation verify (SLSA provenance)"
             echo '```'
-            gh attestation verify "oci://$IMAGE@$DIGEST" --repo "$GITHUB_REPOSITORY" 2>&1
+            # gh prints its human-readable report only to a TTY, so summarise the JSON.
+            gh attestation verify "oci://$IMAGE@$DIGEST" --repo "$GITHUB_REPOSITORY" --format json \
+              | jq -r '.[0].verificationResult | "Verification succeeded",
+                  "Predicate type: \(.statement.predicateType)",
+                  "Build signer:   \(.signature.certificate.buildSignerURI)",
+                  "Run:            \(.signature.certificate.runInvocationURI)"'
             echo '```'
             echo "SBOM components: $(jq '.components | length' sbom.json)"
           } | tee -a "$GITHUB_STEP_SUMMARY"

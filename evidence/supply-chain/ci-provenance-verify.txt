@@ -1,0 +1,20 @@
+Loaded digest sha256:fcc84936059255215d2344ff66b5cd88d926d9dcc40ce41d5bf3999542e8fb0a for oci://ghcr.io/wilasinee3039/three-musketeers@sha256:fcc84936059255215d2344ff66b5cd88d926d9dcc40ce41d5bf3999542e8fb0a
+Loaded 1 attestation from GitHub API
+
+The following policy criteria will be enforced:
+- Predicate type must match:................ https://slsa.dev/provenance/v1
+- Source Repository Owner URI must match:... https://github.com/Wilasinee3039
+- Source Repository URI must match:......... https://github.com/Wilasinee3039/Three-musketeers
+- Subject Alternative Name must match regex: (?i)^https://github\.com/Wilasinee3039/Three-musketeers/
+- OIDC Issuer must match:................... https://token.actions.githubusercontent.com
+
+✓ Verification succeeded!
+
+The following 1 attestation matched the policy criteria
+
+- Attestation #1
+  - Build repo:..... Wilasinee3039/Three-musketeers
+  - Build workflow:. .github/workflows/supply-chain.yml@refs/heads/main
+  - Signer repo:.... Wilasinee3039/Three-musketeers
+  - Signer workflow: .github/workflows/supply-chain.yml@refs/heads/main
+
