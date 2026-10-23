@@ -111,7 +111,7 @@ The primary trust boundaries are between the user's browser and the application 
 
 One block per finding (copy as needed):
 
-### Finding F-01 — <title>
+### Finding F-01 — 
 | Field | Value |
 |---|---|
 | CWE | CWE-___ |
@@ -121,6 +121,19 @@ One block per finding (copy as needed):
 | Reproduction | step-by-step (payload/command) |
 | Impact | what an attacker gains |
 | Evidence | screenshot / request-response |
+
+
+### Finding F-01 — Insecure Direct Object Reference (IDOR/BOLA)
+
+| Field | Value |
+|---|---|
+| CWE | CWE-639 — Authorization Bypass Through User-Controlled Key |
+| OWASP 2025 | A01:2025 — Broken Access Control |
+| Severity | High |
+| Location | `app.py` — `GET /api/notes/<nid>` |
+| Reproduction | 1. Start the NoteVault application and log in as Alice (`alice` / `alicepw`). 2. Visit `http://localhost:8080/api/notes/1` to access Alice's own note. 3. Change the note ID to `2` by visiting `http://localhost:8080/api/notes/2`. 4. Before the fix, the application returns the Admin's private note even though Alice is not its owner. |
+| Impact | An authenticated attacker can access private notes belonging to other users by manipulating note IDs, resulting in unauthorized disclosure of sensitive information. |
+| Evidence | [before-own-note](evidence/F-01-IDOR/before-own-note.png) and [before-admin-note](evidence/F-01-IDOR/before-admin-note.png) |
 
 ---
 
@@ -136,6 +149,55 @@ Per finding: the fix, **before/after** code, and the commit that implements it.
 - **Why this fixes it:** …
 - **Commit:** `<hash>`
 - **Proof the exploit now fails:** (screenshot)
+
+
+
+### Fix for F-01 — Insecure Direct Object Reference (IDOR/BOLA)
+
+**Before/After Code:**
+
+```diff
+- if not current_user():
++ user = current_user()
++ if not user:
+      return jsonify(error="auth required"), 401
+
+  con = db()
+  r = con.execute(
+-     "SELECT id,owner,title,body FROM notes WHERE id = ?",
+-     (nid,)
++     "SELECT id,owner,title,body FROM notes WHERE id = ? AND owner = ?",
++     (nid, user)
+  ).fetchone()
+  con.close()
+
+- return (jsonify(dict(r)) if r else (jsonify(error="not found"), 404))
++ if not r:
++     return jsonify(error="not found"), 404
++
++ return jsonify(dict(r))
+```
+
+**Why this fixes it:**
+
+The original implementation only checked whether the user was authenticated, allowing any logged-in user to access another user's note by changing the note ID.
+
+The fix adds an ownership check directly to the SQL query using `WHERE id = ? AND owner = ?`. This ensures that only the owner of a note can retrieve it. Unauthorized requests return `404 Not Found` without exposing private information.
+
+**Commit:** `8188e9f` — `fix(F-01): prevent unauthorized note access (IDOR)`
+
+**Proof the exploit now fails:**
+
+After applying the fix and rebuilding the application, the endpoint was tested again using Alice's account.
+
+- `/api/notes/1` → Alice can still access her own note.
+- `/api/notes/2` → Returns `{"error":"not found"}` instead of exposing the Admin's private note.
+
+**Evidence:**
+- [after-own-note](evidence/F-01-IDOR/after-own-note.png)
+- [after-admin-note](evidence/F-01-IDOR/after-admin-note.png)
+
+**Result:** The IDOR vulnerability was successfully remediated, and unauthorized note access was prevented.
 
 ---
 
