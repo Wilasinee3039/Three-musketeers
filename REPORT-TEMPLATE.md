@@ -20,7 +20,7 @@
 
 | Tool | How it was used |
 |---|---|
-| Claude (Claude Code) | §6: generated the SBOM, signed the image, wrote the supply-chain CI workflow, and drafted the section. |
+| Claude (Claude Code) | Generated the SBOM, signed the image, wrote the supply-chain CI workflow, and drafted the supply-chain section. |
 | Gemini | Understanding the project and what we needed to do. |
 | ChatGPT | Assisted with project understanding, DFD, STRIDE analysis, vulnerability assessment, and remediation guidance. |
 
@@ -621,7 +621,7 @@ We assessed NoteVault and found five vulnerabilities: two Critical (F-02 SQL Inj
 | Gitleaks | Secret scanning of the Git history in the Security CI |
 | ChatGPT | Technical explanations, security analysis guidance, and report drafting assistance |
 | Gemini | Understanding the project and its requirements |
-| Claude (Claude Code) | SBOM generation, Cosign signing, supply-chain CI workflow, and §6 drafting |
+| Claude (Claude Code) | SBOM generation, Cosign signing, supply-chain CI workflow, and supply-chain section drafting |
 
 ### B. References
 
