@@ -1,0 +1,9 @@
+# Keep the build context minimal and never copy keys or repo metadata into the image.
+.git
+.github
+cosign.key
+cosign.pub
+sbom.json
+evidence
+img
+*.md

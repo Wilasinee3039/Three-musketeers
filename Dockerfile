@@ -1,12 +1,18 @@
-# NoteVault image. Part of the project is to harden this Dockerfile
-# (base pinning, non-root user, no baked secrets, minimal layers).
-FROM python:3.12
+# NoteVault image — hardened: pinned slim base, no baked secrets, non-root user,
+# dependency layer cached separately, no pip cache.
+FROM python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704
 
-ENV APP_SECRET=notevault-dev-secret
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+RUN useradd --create-home --uid 10001 appuser
 
 WORKDIR /app
-COPY . .
-RUN pip install -r requirements.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
+COPY app.py .
+
+USER appuser
 EXPOSE 8080
 CMD ["python", "app.py"]
