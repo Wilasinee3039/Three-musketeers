@@ -20,7 +20,7 @@
 
 | Tool | How it was used |
 |---|---|
-| | |
+| Claude (Claude Code) | §6 Supply-Chain Hardening: ran Syft to generate the CycloneDX SBOM, signed and verified the image with Cosign, wrote the `supply-chain.yml` GitHub Actions workflow (keyless signing, SBOM attestation, SLSA provenance), and drafted §6 including the SLSA self-assessment. Also explained the concepts and helped resolve git merge conflicts. All output was reviewed by the team. |
 
 ---
 
