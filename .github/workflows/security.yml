@@ -1,0 +1,62 @@
+name: Security CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sast:
+    name: SAST - Bandit (HIGH gate)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Bandit
+        run: python -m pip install bandit==1.8.3
+      - name: Scan Python source and fail on HIGH findings
+        run: bandit -r . --exclude ./.git,./.venv --severity-level high --confidence-level all
+
+  sca:
+    name: SCA - pip-audit (any known vulnerability)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pip-audit
+        run: python -m pip install pip-audit==2.9.0
+      - name: Audit application dependencies
+        # pip-audit fails for ANY known vulnerability, including HIGH/CRITICAL.
+        # Its exit status is not a severity-specific filter.
+        run: pip-audit --requirement requirements.txt --strict --progress-spinner off
+
+  secrets:
+    name: Secret scanning - Gitleaks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Scan full Git history for secrets
+        # CLI container avoids the license requirement of the Gitleaks Action.
+        # Redaction keeps detected secret values out of the build log.
+        run: >-
+          docker run --rm
+          -v "$GITHUB_WORKSPACE:/repo:ro"
+          zricethezav/gitleaks:v8.24.2
+          git /repo --redact --verbose --exit-code 1
