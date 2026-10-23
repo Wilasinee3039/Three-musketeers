@@ -147,9 +147,42 @@ Per finding: the fix, **before/after** code, and the commit that implements it.
 ---
 
 ## 7. Security CI Pipeline  *(10 pts)*
-- Link to the GitHub Actions workflow (SAST + SCA + secret scanning).
-- Screenshot of a build **failing** on a HIGH/CRITICAL finding.
-- How the gate is configured (what fails the build).
+
+### 7.1 Workflow
+
+The pipeline is defined in [`.github/workflows/security.yml`](./.github/workflows/security.yml).
+After pushing the file, runs are available under [GitHub Actions — Security CI](https://github.com/Wilasinee3039/Three-musketeers/actions/workflows/security.yml).
+It runs on pushes, pull requests, and manual dispatches. Three independent jobs run the following checks:
+
+| Check | Tool | Failure condition |
+|---|---|---|
+| SAST | Bandit 1.8.3 | At least one HIGH severity finding, at any confidence level. Bandit has no CRITICAL severity category. |
+| SCA | pip-audit 2.9.0 | Any known dependency vulnerability, including HIGH/CRITICAL; this is stricter than a HIGH-only gate. Dependency collection errors also fail the audit through `--strict`. |
+| Secret scanning | Gitleaks 8.24.2 | Any secret detected by the default rules in Git history. Output is redacted. Pattern scanning does not guarantee detection of every hardcoded password. |
+
+Each scanner returns a non-zero exit code on a finding that meets its gate.
+No scan uses `continue-on-error` or `|| true`, so a failed job makes the workflow fail.
+These checks do not block merging automatically: repository branch protection or a ruleset must separately require the three job checks.
+
+### 7.2 Failed-build evidence
+
+**Pending an actual GitHub Actions run.** Do not treat this workflow definition as proof that a build has run.
+
+Local verification on October 23, 2026 with Python 3.12.2 and Bandit 1.8.3 returned exit code **1** and reported **6 HIGH findings**: four B324 weak-MD5 findings, B602 shell execution at `app.py:202`, and B201 Flask debug mode at `app.py:209`. This confirms the local SAST gate; it does not replace the required GitHub Actions screenshot.
+
+The local pip-audit 2.9.0 run also returned exit code **1**, reporting **47 known vulnerabilities in 7 packages**, including transitive dependencies. Counts may change as the advisory database changes. Gitleaks has not been run locally because access to the Docker engine is restricted; verify its result in GitHub Actions.
+
+1. Commit and push `.github/workflows/security.yml` to GitHub.
+2. Open **Actions → Security CI**, then open the run for that commit.
+3. Open **SAST - Bandit (HIGH gate)** and expand **Scan Python source and fail on HIGH findings**.
+4. Capture the HIGH finding, its file/line, the non-zero exit code, and the failed job/run status. For the current starter code, `subprocess.run(..., shell=True)` in `/export` is a candidate; confirm the actual scanner output before claiming a finding.
+5. Save the screenshot as `img/security-ci-failed.png`, then add the image and the real run URL below. If a job fails during installation or setup, that is not evidence of the vulnerability gate.
+
+- **Failed run URL:** pending
+- **Commit tested:** pending
+- **Screenshot:** pending (`img/security-ci-failed.png`)
+
+After remediation, rerun the same workflow and retain the passing run as additional evidence.
 
 ---
 
