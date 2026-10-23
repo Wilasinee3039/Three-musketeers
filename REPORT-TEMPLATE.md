@@ -114,20 +114,6 @@ The primary trust boundaries are between the user's browser and the application 
 
 ## 4. Vulnerability Findings  *(25 pts)*
 
-One block per finding (copy as needed):
-
-### Finding F-01 — 
-| Field | Value |
-|---|---|
-| CWE | CWE-___ |
-| OWASP 2025 | A__ / API__ / LLM__ |
-| Severity | Critical / High / Medium / Low |
-| Location | file:line or endpoint |
-| Reproduction | step-by-step (payload/command) |
-| Impact | what an attacker gains |
-| Evidence | screenshot / request-response |
-
----
 ### Finding F-01 — Insecure Direct Object Reference (IDOR/BOLA)
 
 | Field | Value |
@@ -203,19 +189,6 @@ One block per finding (copy as needed):
 
 ## 5. Remediation  *(25 pts)*
 
-Per finding: the fix, **before/after** code, and the commit that implements it.
-
-### Fix for F-01
-```diff
-- vulnerable line
-+ fixed line
-```
-- **Why this fixes it:** …
-- **Commit:** `<hash>`
-- **Proof the exploit now fails:** (screenshot)
-
-
----
 ### Fix for F-01 — Insecure Direct Object Reference (IDOR/BOLA)
 
 **Before/After Code:**
@@ -383,7 +356,6 @@ After applying the fix and rebuilding the application, the endpoint was tested a
 
 
 ---
-
 ## 6. Supply-Chain Hardening  *(15 pts)*
 
 ### 6.1 SBOM (CycloneDX)
