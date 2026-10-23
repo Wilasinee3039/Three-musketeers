@@ -310,16 +310,16 @@ The [Supply Chain workflow](./.github/workflows/supply-chain.yml) runs on every 
 5. generates signed **SLSA v1 build provenance** with `actions/attest-build-provenance`;
 6. verifies all three and writes the results to the run summary.
 
-First successful run: [Actions run 39931599553](https://github.com/Wilasinee3039/Three-musketeers/actions/runs/39931599553), commit `354dd74`, image `sha256:52138f26…51ff52`.
+Latest successful run: [Actions run 39933618437](https://github.com/Wilasinee3039/Three-musketeers/actions/runs/39933618437), commit `765e265`, image `sha256:fcc84936…e8fb0a`.
 
 `cosign verify` against the CI identity ([evidence](./evidence/supply-chain/ci-cosign-verify.txt)):
 
 ```
-cosign verify ghcr.io/wilasinee3039/three-musketeers@sha256:52138f263bf7eb64bfe614043ee298456ac6ed0ae7787a7c40f37dcc8751ff52 \
+cosign verify ghcr.io/wilasinee3039/three-musketeers@sha256:fcc84936059255215d2344ff66b5cd88d926d9dcc40ce41d5bf3999542e8fb0a \
   --certificate-identity https://github.com/Wilasinee3039/Three-musketeers/.github/workflows/supply-chain.yml@refs/heads/main \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 
-Verification for ghcr.io/wilasinee3039/three-musketeers@sha256:52138f263bf7eb64bfe614043ee298456ac6ed0ae7787a7c40f37dcc8751ff52 --
+Verification for ghcr.io/wilasinee3039/three-musketeers@sha256:fcc84936059255215d2344ff66b5cd88d926d9dcc40ce41d5bf3999542e8fb0a --
 The following checks were performed on each of these signatures:
   - The cosign claims were validated
   - Existence of the claims in the transparency log was verified offline
@@ -329,7 +329,7 @@ The following checks were performed on each of these signatures:
 Provenance verification ([evidence](./evidence/supply-chain/ci-provenance-verify.txt)):
 
 ```
-gh attestation verify oci://ghcr.io/wilasinee3039/three-musketeers@sha256:52138f26... --repo Wilasinee3039/Three-musketeers
+gh attestation verify oci://ghcr.io/wilasinee3039/three-musketeers@sha256:fcc84936... --repo Wilasinee3039/Three-musketeers
 
 - Predicate type must match:................ https://slsa.dev/provenance/v1
 - Source Repository URI must match:......... https://github.com/Wilasinee3039/Three-musketeers
