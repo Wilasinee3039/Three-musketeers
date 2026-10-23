@@ -1,8 +1,8 @@
 
-Verification for ghcr.io/wilasinee3039/three-musketeers@sha256:fcc84936059255215d2344ff66b5cd88d926d9dcc40ce41d5bf3999542e8fb0a --
+Verification for ghcr.io/wilasinee3039/three-musketeers@sha256:2fa841a8760b5398ec59de6f6e86e608d01795100a5541b6c0d5e70654b60cb1 --
 The following checks were performed on each of these signatures:
   - The cosign claims were validated
   - Existence of the claims in the transparency log was verified offline
   - The code-signing certificate was verified using trusted certificate authority certificates
 
-[{"critical":{"identity":{"docker-reference":"ghcr.io/wilasinee3039/three-musketeers@sha256:fcc84936059255215d2344ff66b5cd88d926d9dcc40ce41d5bf3999542e8fb0a"},"image":{"docker-manifest-digest":"sha256:fcc84936059255215d2344ff66b5cd88d926d9dcc40ce41d5bf3999542e8fb0a"},"type":"https://slsa.dev/provenance/v1"},"optional":{}}]
+[{"critical":{"identity":{"docker-reference":"ghcr.io/wilasinee3039/three-musketeers@sha256:2fa841a8760b5398ec59de6f6e86e608d01795100a5541b6c0d5e70654b60cb1"},"image":{"docker-manifest-digest":"sha256:2fa841a8760b5398ec59de6f6e86e608d01795100a5541b6c0d5e70654b60cb1"},"type":"https://slsa.dev/provenance/v1"},"optional":{}}]

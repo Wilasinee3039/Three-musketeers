@@ -21,11 +21,8 @@
 | Tool | How it was used |
 |---|---|
 | Claude (Claude Code) | §6: generated the SBOM, signed the image, wrote the supply-chain CI workflow, and drafted the section. |
-| ChatGPT | Searching for information. |
 | Gemini | Understanding the project and what we needed to do. |
-| ChatGPT | Used to understand project requirements, analyze the NoteVault application structure, and assist in preparing the System Scope and Data Flow Diagram (DFD). |
-| ChatGPT | Assisted in understanding the STRIDE framework, identifying potential security threats, and estimating risk scores using likelihood and impact. |
-| ChatGPT | Provided guidance on vulnerability assessment, including potential security weaknesses in the source code and suggested remediation approaches. |
+| ChatGPT | Assisted with project understanding, DFD, STRIDE analysis, vulnerability assessment, and remediation guidance. |
 
 ---
 
@@ -235,7 +232,6 @@ After applying the fix and rebuilding the application, the endpoint was tested a
    - [after-admin-note](evidence/F-01-IDOR/after-admin-note.png)
 
 
-
 ---
 ### Fix for F-02
 
@@ -293,7 +289,6 @@ After applying the fix and rebuilding the application, the endpoint was tested a
 - **Proof the exploit now fails:** The original payload `txt;echo F03_INJECTION_TEST` is rejected with `invalid export format`, while normal export functionality remains operational. 
    - [After Fix – Command Injection](evidence/F-03-Command-Injection/after-export-command-injection.png) 
    - [After Fix – Normal Export](evidence/F-03-Command-Injection/after-export-normal.png)
-
 
 
 ---
@@ -365,17 +360,19 @@ The SBOM was generated from the built container image with Syft 1.55.0 (CycloneD
 ```bash
 docker build -t notevault:latest .
 SYFT_FILE_METADATA_SELECTION=none syft notevault:latest -o cyclonedx-json=sbom.json
-jq '.components | length' sbom.json   # 490
+jq '.components | length' sbom.json   # 109
 ```
 
-| Component type | Count |
-|---|---|
-| library (Debian OS packages + Python packages) | 482 |
-| application | 7 |
-| operating-system | 1 |
-| **Total** | **490** |
+The SBOM was generated twice: once for the original image and once after hardening the Dockerfile and upgrading dependencies (§5). The committed `sbom.json` is the hardened image.
 
-Of these, 15 are Python packages, including the six declared in `requirements.txt` (Flask 2.0.1, Werkzeug 2.0.1, Jinja2 3.0.1, PyJWT 1.7.1, requests 2.25.1, urllib3 1.26.4). The large OS-package count comes from the unpinned, full `python:3.12` base image, which is most of the image's attack surface.
+| Component type | Before (`python:3.12`, old deps) | After (hardened) |
+|---|---|---|
+| library (Debian OS packages + Python packages) | 482 | 101 |
+| application | 7 | 7 |
+| operating-system | 1 | 1 |
+| **Total** | **490** | **109** |
+
+Hardening cut the component count by **78%**. The original image used the full, unpinned `python:3.12` base, so most components were OS packages the app never uses, and it shipped the vulnerable `requirements.txt` versions (Flask 2.0.1, Werkzeug 2.0.1, Jinja2 3.0.1, PyJWT 1.7.1, requests 2.25.1, urllib3 1.26.4). The hardened image uses `python:3.12-slim` pinned by digest, runs as a non-root user, has no baked-in secret, and contains 14 Python packages at patched versions (Flask 3.1.3, Werkzeug 3.1.9, Jinja2 3.1.6, MarkupSafe 3.0.4, PyJWT 2.15.1, requests 2.34.2, urllib3 2.8.0). pip-audit reports no known vulnerabilities.
 
 ### 6.2 Image signed & verified with Cosign
 
@@ -383,20 +380,20 @@ The image was pushed to a local OCI registry and signed by digest with a Cosign 
 
 ```bash
 cosign generate-key-pair
-cosign sign --key cosign.key localhost:5001/notevault@sha256:0911be0a565e420a8440eaa911ae5372421f9b20039a912dcf3f89da17b8f27e
-cosign verify --key cosign.pub --insecure-ignore-tlog=true localhost:5001/notevault@sha256:0911be0a565e420a8440eaa911ae5372421f9b20039a912dcf3f89da17b8f27e
+cosign sign --key cosign.key localhost:5001/notevault@sha256:27f91e4d82b4136126129cbefcb055edd4cd7f9c09b495c5f2d7361d8194124e
+cosign verify --key cosign.pub --insecure-ignore-tlog=true localhost:5001/notevault@sha256:27f91e4d82b4136126129cbefcb055edd4cd7f9c09b495c5f2d7361d8194124e
 ```
 
 `cosign verify` output ([evidence](./evidence/supply-chain/cosign-verify.txt)):
 
 ```
-Verification for localhost:5001/notevault@sha256:0911be0a565e420a8440eaa911ae5372421f9b20039a912dcf3f89da17b8f27e --
+Verification for localhost:5001/notevault@sha256:27f91e4d82b4136126129cbefcb055edd4cd7f9c09b495c5f2d7361d8194124e --
 The following checks were performed on each of these signatures:
   - The cosign claims were validated
   - Existence of the claims in the transparency log was verified offline
   - The signatures were verified against the specified public key
 
-[{"critical":{"identity":{"docker-reference":"localhost:5001/notevault@sha256:0911be0a565e420a8440eaa911ae5372421f9b20039a912dcf3f89da17b8f27e"},"image":{"docker-manifest-digest":"sha256:0911be0a565e420a8440eaa911ae5372421f9b20039a912dcf3f89da17b8f27e"},"type":"https://sigstore.dev/cosign/sign/v1"},"optional":{}}]
+[{"critical":{"identity":{"docker-reference":"localhost:5001/notevault@sha256:27f91e4d82b4136126129cbefcb055edd4cd7f9c09b495c5f2d7361d8194124e"},"image":{"docker-manifest-digest":"sha256:27f91e4d82b4136126129cbefcb055edd4cd7f9c09b495c5f2d7361d8194124e"},"type":"https://sigstore.dev/cosign/sign/v1"},"optional":{}}]
 ```
 
 Negative check: verifying the same image with an unrelated public key fails ([evidence](./evidence/supply-chain/cosign-verify-wrong-key.txt)):
@@ -418,16 +415,16 @@ The [Supply Chain workflow](./.github/workflows/supply-chain.yml) runs on every 
 5. generates signed **SLSA v1 build provenance** with `actions/attest-build-provenance`;
 6. verifies all three and writes the results to the run summary.
 
-Latest successful run: [Actions run 39933618437](https://github.com/Wilasinee3039/Three-musketeers/actions/runs/39933618437), commit `765e265`, image `sha256:fcc84936…e8fb0a`.
+Latest successful run (hardened image): [Actions run 39942935857](https://github.com/Wilasinee3039/Three-musketeers/actions/runs/39942935857), commit `ea25855`, image `sha256:2fa841a8…b60cb1`, SBOM 109 components.
 
 `cosign verify` against the CI identity ([evidence](./evidence/supply-chain/ci-cosign-verify.txt)):
 
 ```
-cosign verify ghcr.io/wilasinee3039/three-musketeers@sha256:fcc84936059255215d2344ff66b5cd88d926d9dcc40ce41d5bf3999542e8fb0a \
+cosign verify ghcr.io/wilasinee3039/three-musketeers@sha256:2fa841a8760b5398ec59de6f6e86e608d01795100a5541b6c0d5e70654b60cb1 \
   --certificate-identity https://github.com/Wilasinee3039/Three-musketeers/.github/workflows/supply-chain.yml@refs/heads/main \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 
-Verification for ghcr.io/wilasinee3039/three-musketeers@sha256:fcc84936059255215d2344ff66b5cd88d926d9dcc40ce41d5bf3999542e8fb0a --
+Verification for ghcr.io/wilasinee3039/three-musketeers@sha256:2fa841a8760b5398ec59de6f6e86e608d01795100a5541b6c0d5e70654b60cb1 --
 The following checks were performed on each of these signatures:
   - The cosign claims were validated
   - Existence of the claims in the transparency log was verified offline
@@ -437,7 +434,7 @@ The following checks were performed on each of these signatures:
 Provenance verification ([evidence](./evidence/supply-chain/ci-provenance-verify.txt)):
 
 ```
-gh attestation verify oci://ghcr.io/wilasinee3039/three-musketeers@sha256:fcc84936... --repo Wilasinee3039/Three-musketeers
+gh attestation verify oci://ghcr.io/wilasinee3039/three-musketeers@sha256:2fa841a8... --repo Wilasinee3039/Three-musketeers
 
 - Predicate type must match:................ https://slsa.dev/provenance/v1
 - Source Repository URI must match:......... https://github.com/Wilasinee3039/Three-musketeers
@@ -449,7 +446,7 @@ gh attestation verify oci://ghcr.io/wilasinee3039/three-musketeers@sha256:fcc849
 
 ### 6.4 SLSA self-assessment
 
-We assess NoteVault at **SLSA Build Level 2**. The image is built by a scripted process (Dockerfile + workflow) on a hosted build platform (GitHub-hosted runners), not on a developer machine. The build platform itself generates SLSA v1 provenance describing the source repo, commit, workflow and run, and signs it with a short-lived Sigstore certificate tied to the workflow's OIDC identity, so consumers can verify *how* and *where* the image was built, not just who signed it. The image signature and SBOM attestation use the same keyless identity and are recorded in the public Rekor log, so there is no long-lived private key to steal. We do not claim **Level 3**: provenance is generated by a step inside our own workflow rather than an isolated, non-forgeable builder (e.g. the `slsa-github-generator` reusable workflow), so a compromised workflow step could still influence it. The base image is also unpinned (`python:3.12`, not a digest), so rebuilds are not fully reproducible. Pinning the base image and moving to the SLSA reusable workflow would be the next steps toward Level 3.
+We assess NoteVault at **SLSA Build Level 2**. The image is built by a scripted process (Dockerfile + workflow) on a hosted build platform (GitHub-hosted runners), not on a developer machine. The build platform itself generates SLSA v1 provenance describing the source repo, commit, workflow and run, and signs it with a short-lived Sigstore certificate tied to the workflow's OIDC identity, so consumers can verify *how* and *where* the image was built, not just who signed it. The image signature and SBOM attestation use the same keyless identity and are recorded in the public Rekor log, so there is no long-lived private key to steal. We do not claim **Level 3**: provenance is generated by a step inside our own workflow rather than an isolated, non-forgeable builder (e.g. the `slsa-github-generator` reusable workflow), so a compromised workflow step could still influence it. The base image is now pinned by digest (`python:3.12-slim@sha256:…`), but transitive Python dependencies are not hash-pinned, so rebuilds are not fully reproducible. Hash-pinning dependencies and moving to the SLSA reusable workflow would be the next steps toward Level 3.
 
 ---
 
@@ -491,8 +488,28 @@ After remediation, rerun the same workflow and retain the passing run as additio
 ---
 
 ## 8. Conclusion & Reflection  *(5 pts — clarity)*
-- Residual risks and what you'd harden next.
-- Lessons learned.
+
+We assessed NoteVault and found five vulnerabilities: two Critical (F-02 SQL Injection, F-03 Command Injection) and three High (F-01 IDOR, F-04 Mass Assignment, F-05 Stored XSS). All five are fixed and re-tested. We also replaced MD5 password hashing with salted scrypt, disabled Flask debug mode, upgraded every vulnerable dependency, and hardened the Docker image (slim pinned base, non-root user, no baked secret). The Security CI now passes all three gates (Bandit, pip-audit, Gitleaks). Every release image is built in CI, signed with Cosign, shipped with a CycloneDX SBOM (490 → 109 components), and carries SLSA Level 2 provenance.
+
+### Residual risks and what we would harden next
+
+| Residual risk | Next step |
+|---|---|
+| The JWT signing secret is hard-coded in `app.py` (`SECRET`). | Load it from an environment variable or secret manager and rotate it. |
+| `jwt.decode` still lists `"none"` as an allowed algorithm. PyJWT 2.x rejects unsigned tokens when a key is given (a forged admin token now returns 403), so this is not exploitable, but it relies on library behaviour. | Allow only `HS256`. |
+| The session cookie has no `HttpOnly`, `Secure` or `SameSite` flags, and forms have no CSRF protection. | Set the cookie flags and add CSRF tokens (e.g. Flask-WTF). |
+| `/login` has no rate limiting or lockout. | Add rate limiting to slow down brute-force attacks. |
+| `/admin` returns every user's password hash. | Return only the fields the admin view needs. |
+| Seeded demo accounts use weak passwords (`admin123`). | Remove seed users from production builds. |
+| Supply chain is SLSA Level 2, and transitive dependencies are not hash-pinned. | Use `pip install --require-hashes` and the SLSA reusable workflow for Level 3. |
+
+### Lessons learned
+
+- **Small mistakes cause big impact.** One missing ownership check (F-01) or one string-built query (F-02) was enough to expose the admin's secrets. Parameterized queries, output escaping and server-side authorization should be the default, not an afterthought.
+- **Automated checks catch what reviews miss.** The CI found the weak MD5 hashing, debug mode and dozens of known dependency vulnerabilities that we had not listed in our manual findings. A failing pipeline is useful evidence, not a problem.
+- **Upgrades need testing.** Moving to Flask 3 / Werkzeug 3 broke form logins (`request.json` now returns 415) until we changed the code, so every security upgrade must be re-tested.
+- **The build is part of the attack surface.** Switching to a slim base image removed 78% of the image's components, and signing plus provenance lets anyone verify that the image came from our repository and was not tampered with.
+- **Team coordination matters.** Working on the same `main` branch caused several merge conflicts; short-lived feature branches and pull requests would have made integration smoother.
 
 ---
 
@@ -537,7 +554,6 @@ References accessed on October 23, 2026.
 | Team Member | Responsibilities |
 |---|---|
 | Sai Seng Main | Project setup, Supply-Chain Hardening, SBOM generation, Cosign signing and verification, SLSA provenance, and supply-chain documentation. |
-| Wilasinee Mangkorn | 
 | Wilasinee Mangkorn | Vulnerability assessment and remediation for F-01 (IDOR), F-02 (SQL Injection), F-03 (OS Command Injection), and F-04 (Mass Assignment / Privilege Escalation), including evidence collection, report documentation, and Git integration. | |
 | Pirisa Kitichai | Threat Modeling (System Scope, DFD, STRIDE Analysis), Security CI Pipeline implementation and testing, README documentation, and CI failure evidence collection. |
 

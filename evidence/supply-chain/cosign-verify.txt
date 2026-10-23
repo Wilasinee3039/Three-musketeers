@@ -1,7 +1,7 @@
-Verification for localhost:5001/notevault@sha256:0911be0a565e420a8440eaa911ae5372421f9b20039a912dcf3f89da17b8f27e --
+Verification for localhost:5001/notevault@sha256:27f91e4d82b4136126129cbefcb055edd4cd7f9c09b495c5f2d7361d8194124e --
 The following checks were performed on each of these signatures:
   - The cosign claims were validated
   - Existence of the claims in the transparency log was verified offline
   - The signatures were verified against the specified public key
 
-[{"critical":{"identity":{"docker-reference":"localhost:5001/notevault@sha256:0911be0a565e420a8440eaa911ae5372421f9b20039a912dcf3f89da17b8f27e"},"image":{"docker-manifest-digest":"sha256:0911be0a565e420a8440eaa911ae5372421f9b20039a912dcf3f89da17b8f27e"},"type":"https://sigstore.dev/cosign/sign/v1"},"optional":{}}]
+[{"critical":{"identity":{"docker-reference":"localhost:5001/notevault@sha256:27f91e4d82b4136126129cbefcb055edd4cd7f9c09b495c5f2d7361d8194124e"},"image":{"docker-manifest-digest":"sha256:27f91e4d82b4136126129cbefcb055edd4cd7f9c09b495c5f2d7361d8194124e"},"type":"https://sigstore.dev/cosign/sign/v1"},"optional":{}}]
