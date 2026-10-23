@@ -177,7 +177,7 @@ The primary trust boundaries are between the user's browser and the application 
 |---|---|
 | CWE | CWE-79: Improper Neutralization of Input During Web Page Generation |
 | OWASP 2025 | A05:2025 – Injection |
-| Severity | High |
+| Severity | Medium |
 | Location | `app.py` — `GET /` (Home) and `GET /search` |
 | Reproduction | 1. Log in as `alice` using `alicepw`. 2. Create a note with title `F05 XSS Test` and body `<img src=x onerror=alert('F05_XSS_TEST')>`. 3. Return to the Home page and observe the JavaScript alert `F05_XSS_TEST`. 4. Search for `F05_XSS_TEST` and observe the same alert on the Search results page. |
 | Impact | An attacker can store malicious JavaScript in a note that executes when the note is rendered in a user's browser. This could enable unauthorized actions, manipulation of displayed content, or exposure of sensitive information accessible to the affected page. |
