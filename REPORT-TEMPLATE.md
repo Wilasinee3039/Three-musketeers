@@ -349,6 +349,67 @@ After applying the fix and rebuilding the application, the endpoint was tested a
   - [After Fix – Home XSS](evidence/F-05-Stored-XSS/after-home-xss.png)
   - [After Fix – Search XSS](evidence/F-05-Stored-XSS/after-search-xss.png)
 
+### Additional hardening (found by Security CI)
+
+Besides F-01 to F-05, the Security CI (§7) flagged four more weaknesses. All four were fixed in commit `56a9eb9` — `refactor: upgrade password hashing to werkzeug security and harden dockerfile configuration`.
+
+**1. Weak password hashing (MD5)** (Bandit B324, HIGH)
+
+```diff
+- hashlib.md5(password.encode()).hexdigest()
++ generate_password_hash(password)
+
+- row = con.execute("SELECT * FROM users WHERE username = ? AND password = ?",
+-                   (username, hashlib.md5((password or "").encode()).hexdigest())).fetchone()
+- if not row:
++ row = con.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
++ if not row or not check_password_hash(row["password"], password or ""):
+```
+
+- **Why this fixes it:** MD5 is fast and unsalted, so leaked hashes can be cracked quickly. Werkzeug's `generate_password_hash` uses salted scrypt, which is slow by design and gives each password a unique salt.
+
+**2. Flask debug mode enabled** (Bandit B201, HIGH)
+
+```diff
+- app.run(host="0.0.0.0", port=8080, debug=True)
++ app.run(host="0.0.0.0", port=8080, debug=os.environ.get("FLASK_DEBUG") == "1")
+```
+
+- **Why this fixes it:** Debug mode exposes the Werkzeug debugger, which allows running arbitrary code. It is now off unless explicitly enabled for local development.
+
+**3. Vulnerable dependencies** (pip-audit)
+
+```diff
+- Flask==2.0.1      Werkzeug==2.0.1   Jinja2==3.0.1
+- PyJWT==1.7.1      requests==2.25.1  urllib3==1.26.4
++ Flask==3.1.3      Werkzeug==3.1.9   Jinja2==3.1.6   MarkupSafe==3.0.4
++ PyJWT==2.15.1     requests==2.34.2  urllib3==2.8.0
+```
+
+- **Why this fixes it:** Every original package had known CVEs. Upgrading to patched releases removes them. Flask 3 no longer accepts `request.json` on form posts, so login and register now use `request.get_json(silent=True)`.
+
+**4. Insecure Dockerfile**
+
+```diff
+- FROM python:3.12
+- ENV APP_SECRET=notevault-dev-secret
+- COPY . .
+- RUN pip install -r requirements.txt
++ FROM python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704
++ RUN useradd --create-home --uid 10001 appuser
++ COPY requirements.txt .
++ RUN pip install --no-cache-dir -r requirements.txt
++ COPY app.py .
++ USER appuser
+```
+
+- **Why this fixes it:** The base image is smaller and pinned by digest, no secret is baked into the image, the app runs as a non-root user, and only `app.py` is copied. A new `.dockerignore` also keeps `.git` and the private signing key out of the build.
+
+**Proof the fixes work:**
+- Bandit reports **0 HIGH** findings, and pip-audit reports **"No known vulnerabilities found"**. The Security CI passes all three jobs.
+- The app runs as `appuser` with the debugger off. Login, register, notes and search still work after the upgrade.
+- The image shrank from **490 to 109 components** (§6.1).
+
 
 ---
 ## 6. Supply-Chain Hardening  *(15 pts)*
