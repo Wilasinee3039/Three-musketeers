@@ -202,9 +202,59 @@ After applying the fix and rebuilding the application, the endpoint was tested a
 ---
 
 ## 6. Supply-Chain Hardening  *(15 pts)*
-- **SBOM** (CycloneDX) generated — attach `sbom.json`, note component count.
-- **Artifact signed & verified** with Cosign — paste the `cosign verify` output.
-- One-paragraph **SLSA** self-assessment (which level, why).
+
+### 6.1 SBOM (CycloneDX)
+
+The SBOM was generated from the built container image with Syft 1.55.0 (CycloneDX 1.7 JSON): [`sbom.json`](./sbom.json).
+
+```bash
+docker build -t notevault:latest .
+SYFT_FILE_METADATA_SELECTION=none syft notevault:latest -o cyclonedx-json=sbom.json
+jq '.components | length' sbom.json   # 490
+```
+
+| Component type | Count |
+|---|---|
+| library (Debian OS packages + Python packages) | 482 |
+| application | 7 |
+| operating-system | 1 |
+| **Total** | **490** |
+
+Of these, 15 are Python packages, including the six declared in `requirements.txt` (Flask 2.0.1, Werkzeug 2.0.1, Jinja2 3.0.1, PyJWT 1.7.1, requests 2.25.1, urllib3 1.26.4). The large OS-package count comes from the unpinned, full `python:3.12` base image, which is most of the image's attack surface.
+
+### 6.2 Image signed & verified with Cosign
+
+The image was pushed to a local OCI registry and signed by digest with a Cosign key pair (Cosign v3.1.4). The public key is committed as [`cosign.pub`](./cosign.pub); the private key is git-ignored.
+
+```bash
+cosign generate-key-pair
+cosign sign --key cosign.key localhost:5001/notevault@sha256:0911be0a565e420a8440eaa911ae5372421f9b20039a912dcf3f89da17b8f27e
+cosign verify --key cosign.pub --insecure-ignore-tlog=true localhost:5001/notevault@sha256:0911be0a565e420a8440eaa911ae5372421f9b20039a912dcf3f89da17b8f27e
+```
+
+`cosign verify` output ([evidence](./evidence/supply-chain/cosign-verify.txt)):
+
+```
+Verification for localhost:5001/notevault@sha256:0911be0a565e420a8440eaa911ae5372421f9b20039a912dcf3f89da17b8f27e --
+The following checks were performed on each of these signatures:
+  - The cosign claims were validated
+  - Existence of the claims in the transparency log was verified offline
+  - The signatures were verified against the specified public key
+
+[{"critical":{"identity":{"docker-reference":"localhost:5001/notevault@sha256:0911be0a565e420a8440eaa911ae5372421f9b20039a912dcf3f89da17b8f27e"},"image":{"docker-manifest-digest":"sha256:0911be0a565e420a8440eaa911ae5372421f9b20039a912dcf3f89da17b8f27e"},"type":"https://sigstore.dev/cosign/sign/v1"},"optional":{}}]
+```
+
+Negative check: verifying the same image with an unrelated public key fails ([evidence](./evidence/supply-chain/cosign-verify-wrong-key.txt)):
+
+```
+Error: no matching attestations: failed to verify signature: could not verify envelope: accepted signatures do not match threshold, Found: 0, Expected 1
+```
+
+Because the registry was local and offline, signing skipped the public Rekor transparency log (`--tlog-upload=false`), so verification uses `--insecure-ignore-tlog=true`.
+
+### 6.3 SLSA self-assessment
+
+We assess NoteVault at **SLSA Build Level 1** at best (effectively L0–L1). The build is fully scripted in a Dockerfile, and we publish a CycloneDX SBOM and a Cosign signature, so a consumer can check what the image contains and that it has not been changed since we signed it. We do not reach Level 2: the image is built and signed on a developer workstation rather than a hosted build platform, there is no signed provenance attestation produced by the build service (the signature proves *who* signed, not *how* the image was built), and signing used a long-lived local key without a transparency-log entry. The base image is also unpinned (`python:3.12`, not a digest), so rebuilds are not reproducible. Moving the build into GitHub Actions with keyless (OIDC) Cosign signing, a Rekor entry, and `actions/attest-build-provenance` would reach **Level 2**. Using the isolated `slsa-github-generator` reusable workflow would reach **Level 3**.
 
 ---
 
