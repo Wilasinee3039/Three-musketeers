@@ -23,6 +23,9 @@
 | Claude (Claude Code) | §6: generated the SBOM, signed the image, wrote the supply-chain CI workflow, and drafted the section. |
 | ChatGPT | Searching for information. |
 | Gemini | Understanding the project and what we needed to do. |
+| ChatGPT | Used to understand project requirements, analyze the NoteVault application structure, and assist in preparing the System Scope and Data Flow Diagram (DFD). |
+| ChatGPT | Assisted in understanding the STRIDE framework, identifying potential security threats, and estimating risk scores using likelihood and impact. |
+| ChatGPT | Provided guidance on vulnerability assessment, including potential security weaknesses in the source code and suggested remediation approaches. |
 
 ---
 
@@ -509,9 +512,10 @@ References accessed on October 23, 2026.
 
 | Team Member | Responsibilities |
 |---|---|
-| Sai Seng Main | To be updated |
-| Wilasinee Mangkorn | To be updated |
-| Pirisa Kitichai | System Scope, DFD, STRIDE Analysis, Securi|
+| Sai Seng Main | Project setup, Supply-Chain Hardening, SBOM generation, Cosign signing and verification, SLSA provenance, and supply-chain documentation. |
+| Wilasinee Mangkorn | 
+| Wilasinee Mangkorn | Vulnerability assessment and remediation for F-01 (IDOR), F-02 (SQL Injection), F-03 (OS Command Injection), and F-04 (Mass Assignment / Privilege Escalation), including evidence collection, report documentation, and Git integration. | |
+| Pirisa Kitichai | Threat Modeling (System Scope, DFD, STRIDE Analysis), Security CI Pipeline implementation and testing, README documentation, and CI failure evidence collection. |
 
 ### D. Supporting Evidence
 
