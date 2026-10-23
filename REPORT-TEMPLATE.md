@@ -389,7 +389,58 @@ After remediation, rerun the same workflow and retain the passing run as additio
 ---
 
 ## Appendix
-- Tools used, references (OWASP/CWE links), and the team's task split.
+
+### A. Tools Used
+
+| Tool | Purpose |
+|---|---|
+| Visual Studio Code | Source code editing and project development |
+| Git & GitHub | Version control and team collaboration |
+| Docker & Docker Compose | Running the NoteVault application locally |
+| Python Flask | Backend web application framework |
+| SQLite | Application database |
+| GitHub Actions | Automated security CI pipeline |
+| CycloneDX | Software Bill of Materials (SBOM) generation |
+| Cosign | Release artifact signing and verification |
+| ChatGPT | Technical explanations, security analysis guidance, and report drafting assistance |
+
+### B. References
+
+The following sources support the weakness classifications and remediation approaches in Sections 4 and 5. CWE identifies the specific weakness, while OWASP provides the broader risk category. The project's screenshots and test results provide evidence that the weakness occurred in NoteVault.
+
+| Finding | CWE reference | OWASP reference | Application to this report |
+|---|---|---|---|
+| F-01: IDOR/BOLA | MITRE. [CWE-639: Authorization Bypass Through User-Controlled Key](https://cwe.mitre.org/data/definitions/639.html) | OWASP. [A01:2025 - Broken Access Control](https://top10.owasp.org/2025/A01_2025-Broken_Access_Control/) | A user could change the note ID to retrieve another user's note. The remediation checks ownership in the database query. |
+| F-02: SQL Injection | MITRE. [CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')](https://cwe.mitre.org/data/definitions/89.html) | OWASP. [A05:2025 - Injection](https://top10.owasp.org/2025/A05_2025-Injection/) | Login and search queries previously incorporated user input into SQL text. Parameterized queries separate input values from SQL commands. |
+
+Additional references for threat modeling, API security, and supply-chain hardening:
+
+1. OWASP. [Top 10:2025](https://owasp.org/Top10/2025/).
+2. OWASP. [API Security Top 10:2023](https://owasp.org/API-Security/editions/2023/en/0x11-t10/).
+3. OWASP. [Threat Modeling](https://owasp.org/www-community/Threat_Modeling).
+4. CycloneDX. [CycloneDX specification and documentation](https://cyclonedx.org/).
+5. Sigstore. [Cosign documentation](https://docs.sigstore.dev/).
+6. SLSA. [SLSA framework](https://slsa.dev/).
+
+References accessed on October 23, 2026.
+
+### C. Team Task Split
+
+| Team Member | Responsibilities |
+|---|---|
+| Sai Seng Main | To be updated |
+| Wilasinee Mangkorn | To be updated |
+| Pirisa Kitichai | System Scope, DFD, STRIDE Analysis, Securi|
+
+### D. Supporting Evidence
+
+- Data Flow Diagram: `img/Data Flow Diagram.png`
+- Vulnerability Evidence: `evidence/`
+- SBOM: `supply-chain/sbom.json`
+- Security CI Workflow: `.github/workflows/security.yml`
+
+Additional evidence and remediation commit references will be updated as the project progresses.
+
 
 ---
 
