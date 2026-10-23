@@ -537,7 +537,6 @@ References accessed on October 23, 2026.
 | Team Member | Responsibilities |
 |---|---|
 | Sai Seng Main | Project setup, Supply-Chain Hardening, SBOM generation, Cosign signing and verification, SLSA provenance, and supply-chain documentation. |
-| Wilasinee Mangkorn | 
 | Wilasinee Mangkorn | Vulnerability assessment and remediation for F-01 (IDOR), F-02 (SQL Injection), F-03 (OS Command Injection), and F-04 (Mass Assignment / Privilege Escalation), including evidence collection, report documentation, and Git integration. | |
 | Pirisa Kitichai | Threat Modeling (System Scope, DFD, STRIDE Analysis), Security CI Pipeline implementation and testing, README documentation, and CI failure evidence collection. |
 
