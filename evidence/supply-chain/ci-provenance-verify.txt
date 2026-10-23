@@ -1,4 +1,4 @@
-Loaded digest sha256:fcc84936059255215d2344ff66b5cd88d926d9dcc40ce41d5bf3999542e8fb0a for oci://ghcr.io/wilasinee3039/three-musketeers@sha256:fcc84936059255215d2344ff66b5cd88d926d9dcc40ce41d5bf3999542e8fb0a
+Loaded digest sha256:2fa841a8760b5398ec59de6f6e86e608d01795100a5541b6c0d5e70654b60cb1 for oci://ghcr.io/wilasinee3039/three-musketeers@sha256:2fa841a8760b5398ec59de6f6e86e608d01795100a5541b6c0d5e70654b60cb1
 Loaded 1 attestation from GitHub API
 
 The following policy criteria will be enforced:
