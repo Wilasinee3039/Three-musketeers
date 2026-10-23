@@ -21,11 +21,8 @@
 | Tool | How it was used |
 |---|---|
 | Claude (Claude Code) | §6: generated the SBOM, signed the image, wrote the supply-chain CI workflow, and drafted the section. |
-| ChatGPT | Searching for information. |
 | Gemini | Understanding the project and what we needed to do. |
-| ChatGPT | Used to understand project requirements, analyze the NoteVault application structure, and assist in preparing the System Scope and Data Flow Diagram (DFD). |
-| ChatGPT | Assisted in understanding the STRIDE framework, identifying potential security threats, and estimating risk scores using likelihood and impact. |
-| ChatGPT | Provided guidance on vulnerability assessment, including potential security weaknesses in the source code and suggested remediation approaches. |
+| ChatGPT | Assisted with project understanding, DFD, STRIDE analysis, vulnerability assessment, and remediation guidance. |
 
 ---
 
@@ -235,7 +232,6 @@ After applying the fix and rebuilding the application, the endpoint was tested a
    - [after-admin-note](evidence/F-01-IDOR/after-admin-note.png)
 
 
-
 ---
 ### Fix for F-02
 
@@ -293,7 +289,6 @@ After applying the fix and rebuilding the application, the endpoint was tested a
 - **Proof the exploit now fails:** The original payload `txt;echo F03_INJECTION_TEST` is rejected with `invalid export format`, while normal export functionality remains operational. 
    - [After Fix – Command Injection](evidence/F-03-Command-Injection/after-export-command-injection.png) 
    - [After Fix – Normal Export](evidence/F-03-Command-Injection/after-export-normal.png)
-
 
 
 ---
