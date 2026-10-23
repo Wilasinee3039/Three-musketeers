@@ -27,7 +27,14 @@
 ---
 
 ## 1. Executive Summary
-*(½ page) What the app is, how many findings by severity, and the overall risk before vs. after your fixes.*
+
+NoteVault is a Python Flask web application with a SQLite database and JWT-based authentication. It supports user registration and login, personal note creation and retrieval, searching, administrative access, and an export endpoint. This project assessed the application and its build process through source-code review, Data Flow Diagram (DFD) and STRIDE threat modeling, controlled exploit testing, and automated security scanning.
+
+The assessment identified **five application vulnerabilities: two Critical and three High**. The Critical findings were SQL Injection in login and search (F-02) and OS Command Injection in export (F-03). The High findings were Insecure Direct Object Reference (IDOR/BOLA) in the notes API (F-01), Mass Assignment allowing administrator registration (F-04), and Stored Cross-Site Scripting (XSS) on the Home and Search pages (F-05). Before remediation, these weaknesses created a high overall risk, enabling authentication bypass, disclosure of other users' private notes, privilege escalation, operating-system command execution, and execution of stored JavaScript.
+
+All five findings were remediated, with before-and-after evidence documented in this report. The fixes enforce note ownership, use parameterized SQL queries, validate export formats without invoking a shell, assign registration roles on the server, and escape note content before HTML rendering. Additional hardening replaced MD5 password hashing with salted scrypt, disabled debug mode by default, upgraded dependencies, and adopted a digest-pinned slim Docker base running as a non-root user. The committed CycloneDX SBOM contains **109 components**, compared with 490 reported for the original image. GitHub Actions workflows provide Bandit, pip-audit, and Gitleaks checks, plus automated image signing, SBOM attestation, and build provenance, supporting the team's **SLSA Build Level 2 self-assessment**.
+
+These changes substantially reduce the demonstrated attack paths, but do not establish production readiness. Remaining risks include a hard-coded JWT secret, incomplete session-cookie protections, missing CSRF protection and login rate limiting, and password-hash exposure through the administrative endpoint. These should be addressed before deployment beyond the controlled testing environment.
 
 ---
 
@@ -483,7 +490,27 @@ Local verification on October 23, 2026 with Python 3.12.2 and Bandit 1.8.3 also 
 
 The local pip-audit 2.9.0 run returned exit code **1**, reporting **47 known vulnerabilities in 7 packages**, including transitive dependencies. Counts may change as the advisory database changes.
 
-After remediation, rerun the same workflow and retain the passing run as additional evidence.
+These results describe the application before the subsequent security hardening. The successful post-remediation run is documented below.
+
+### 7.3 Successful build after remediation
+
+![GitHub Actions Security CI successfully passing all three security checks](./img/security-ci-success.png)
+
+**Figure 7.2:** Security CI run #26 for commit `b59ebc3` completed with **Success**. All three jobs—SAST (Bandit), SCA (pip-audit), and secret scanning (Gitleaks)—passed after remediation.
+
+After the application fixes, password-hashing upgrade, debug-mode change, and dependency upgrades, the same Security CI workflow completed successfully. [Run 39944095588](https://github.com/Wilasinee3039/Three-musketeers/actions/runs/39944095588) tested commit `b59ebc34638aae07d78e6a9271ab3dc69f11f7ee` on **October 23, 2026 at 18:09 (UTC+7)**. All three scanner jobs and their scanning steps completed with a `success` conclusion.
+
+| Check | Before remediation (§7.2) | After remediation | Evidence |
+|---|---|---|---|
+| SAST — Bandit | Failed; 6 HIGH findings | Passed the HIGH-severity gate | [Bandit job](https://github.com/Wilasinee3039/Three-musketeers/actions/runs/39944095588/job/120382373643) |
+| SCA — pip-audit | Failed; shown in the original CI screenshot | Passed; scanner reported `No known vulnerabilities found` | [pip-audit job](https://github.com/Wilasinee3039/Three-musketeers/actions/runs/39944095588/job/120382373966) |
+| Secret scanning — Gitleaks | Passed | Passed | [Gitleaks job](https://github.com/Wilasinee3039/Three-musketeers/actions/runs/39944095588/job/120382373962) |
+
+The scanner configuration and failure conditions remain as described in §7.1; passing was achieved by changing the application and dependencies, without disabling the checks. The original failed-run screenshot is retained to demonstrate detection, while the successful run provides evidence of the result after remediation.
+
+**Saved evidence:** [Run metadata and job/step conclusions](./evidence/security-ci/success-run-39944095588.json) and [scanner-step log excerpts](./evidence/security-ci/success-scanner-logs-39944095588.txt), retrieved from GitHub Actions.
+
+A successful run means the configured checks passed for this commit and the advisory data available at scan time. Bandit passing its HIGH gate does not establish that all lower-severity findings are resolved, and Gitleaks passing does not establish that every application secret has been removed. The remaining application risks are listed in §8. This Security CI result is separate from the Supply Chain workflow described in §6.
 
 ---
 

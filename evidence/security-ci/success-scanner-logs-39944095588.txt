@@ -1,0 +1,85 @@
+﻿SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	﻿2026-10-23T11:09:29.0997775Z ##[group]Run bandit -r . --exclude ./.git,./.venv --severity-level high --confidence-level all
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.0998384Z ^[[36;1mbandit -r . --exclude ./.git,./.venv --severity-level high --confidence-level all^[[0m
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.1053612Z shell: /usr/bin/bash -e {0}
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.1053837Z env:
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.1054105Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.1054536Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.1054954Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.1055310Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.1055685Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.1055995Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.1056384Z ##[endgroup]
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2364290Z [main]	INFO	profile include tests: None
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2365004Z [main]	INFO	profile exclude tests: None
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2365487Z [main]	INFO	cli include tests: None
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2365854Z [main]	INFO	cli exclude tests: None
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2366259Z [main]	INFO	running on Python 3.12.15
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2554294Z Run started:2026-10-23 11:09:29.255250
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2554616Z 
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2554737Z Test results:
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2555051Z 	No issues identified.
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2555183Z 
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2555288Z Code scanned:
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2555481Z 	Total lines of code: 189
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2555704Z 	Total lines skipped (#nosec): 0
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2556104Z 	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2556405Z 
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2556488Z Run metrics:
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2556672Z 	Total issues (by severity):
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2556901Z 		Undefined: 0
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2557066Z 		Low: 4
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2557230Z 		Medium: 2
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2557392Z 		High: 0
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2557572Z 	Total issues (by confidence):
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2557775Z 		Undefined: 0
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2557943Z 		Low: 0
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2558099Z 		Medium: 3
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2558256Z 		High: 3
+SAST - Bandit (HIGH gate)	Scan Python source and fail on HIGH findings	2026-10-23T11:09:29.2558420Z Files skipped (0):
+Secret scanning - Gitleaks	Scan full Git history for secrets	﻿2026-10-23T11:09:25.7694873Z ##[group]Run docker run --rm -v "$GITHUB_WORKSPACE:/repo:ro" zricethezav/gitleaks:v8.24.2 git /repo --redact --verbose --exit-code 1
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:25.7699529Z ^[[36;1mdocker run --rm -v "$GITHUB_WORKSPACE:/repo:ro" zricethezav/gitleaks:v8.24.2 git /repo --redact --verbose --exit-code 1^[[0m
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:25.7969026Z shell: /usr/bin/bash -e {0}
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:25.7970362Z ##[endgroup]
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:25.9088250Z Unable to find image 'zricethezav/gitleaks:v8.24.2' locally
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:26.1513883Z v8.24.2: Pulling from zricethezav/gitleaks
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:26.2273976Z 83abf496f1b8: Pulling fs layer
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:26.2276291Z ca84326b140f: Pulling fs layer
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:26.2278246Z 0d6c2d91852b: Pulling fs layer
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:26.2280147Z 5f3dea6ea896: Pulling fs layer
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:26.2281959Z 5f3dea6ea896: Waiting
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:26.2891177Z 83abf496f1b8: Verifying Checksum
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:26.2893461Z 83abf496f1b8: Download complete
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:26.2975266Z ca84326b140f: Verifying Checksum
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:26.2982090Z ca84326b140f: Download complete
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:26.3065112Z 0d6c2d91852b: Verifying Checksum
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:26.3066960Z 0d6c2d91852b: Download complete
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:26.3214918Z 5f3dea6ea896: Verifying Checksum
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:26.3217584Z 5f3dea6ea896: Download complete
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:26.4007143Z 83abf496f1b8: Pull complete
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:28.8542542Z ca84326b140f: Pull complete
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:28.9325437Z 0d6c2d91852b: Pull complete
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:28.9424395Z 5f3dea6ea896: Pull complete
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:28.9470816Z Digest: sha256:b5918eb91b8d2473cec722f066abb4352e4ffdc4ec9f4283ec143aba9ec9ebc4
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:28.9482787Z Status: Downloaded newer image for zricethezav/gitleaks:v8.24.2
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:29.1366942Z 
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:29.1368045Z     ○
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:29.1368651Z     │╲
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:29.1369110Z     │ ○
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:29.1369556Z     ○ ░
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:29.1369997Z     ░    gitleaks
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:29.1370410Z 
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:30.1655974Z ^[[90m11:09AM^[[0m ^[[32mINF^[[0m ^[[1m31 commits scanned.^[[0m
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:30.1657518Z ^[[90m11:09AM^[[0m ^[[32mINF^[[0m ^[[1mscanned ~1600718 bytes (1.60 MB) in 1.03s^[[0m
+Secret scanning - Gitleaks	Scan full Git history for secrets	2026-10-23T11:09:30.1658664Z ^[[90m11:09AM^[[0m ^[[32mINF^[[0m ^[[1mno leaks found^[[0m
+SCA - pip-audit (any known vulnerability)	Audit application dependencies	﻿2026-10-23T11:09:31.0656297Z ##[group]Run pip-audit --requirement requirements.txt --strict --progress-spinner off
+SCA - pip-audit (any known vulnerability)	Audit application dependencies	2026-10-23T11:09:31.0656921Z ^[[36;1mpip-audit --requirement requirements.txt --strict --progress-spinner off^[[0m
+SCA - pip-audit (any known vulnerability)	Audit application dependencies	2026-10-23T11:09:31.0696648Z shell: /usr/bin/bash -e {0}
+SCA - pip-audit (any known vulnerability)	Audit application dependencies	2026-10-23T11:09:31.0696930Z env:
+SCA - pip-audit (any known vulnerability)	Audit application dependencies	2026-10-23T11:09:31.0697204Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+SCA - pip-audit (any known vulnerability)	Audit application dependencies	2026-10-23T11:09:31.0697631Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+SCA - pip-audit (any known vulnerability)	Audit application dependencies	2026-10-23T11:09:31.0698180Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+SCA - pip-audit (any known vulnerability)	Audit application dependencies	2026-10-23T11:09:31.0698649Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+SCA - pip-audit (any known vulnerability)	Audit application dependencies	2026-10-23T11:09:31.0699020Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+SCA - pip-audit (any known vulnerability)	Audit application dependencies	2026-10-23T11:09:31.0699999Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+SCA - pip-audit (any known vulnerability)	Audit application dependencies	2026-10-23T11:09:31.0700330Z ##[endgroup]
+SCA - pip-audit (any known vulnerability)	Audit application dependencies	2026-10-23T11:09:36.8270582Z No known vulnerabilities found
