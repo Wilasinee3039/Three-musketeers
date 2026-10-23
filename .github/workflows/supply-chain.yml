@@ -1,0 +1,94 @@
+name: Supply Chain
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-sign-attest:
+    name: Build, SBOM, sign & provenance
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write      # push image to ghcr.io
+      id-token: write      # keyless Cosign signing + provenance (GitHub OIDC)
+      attestations: write  # store build provenance attestation
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set lowercase image name
+        # ghcr.io requires lowercase repository names.
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ env.IMAGE }}:${{ github.sha }}
+
+      - name: Generate CycloneDX SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}
+          format: cyclonedx-json
+          output-file: sbom.json
+          artifact-name: sbom.cyclonedx.json
+
+      - uses: sigstore/cosign-installer@v3
+
+      - name: Sign image (keyless)
+        run: cosign sign --yes "$IMAGE@${{ steps.build.outputs.digest }}"
+
+      - name: Attach SBOM as signed attestation
+        run: >-
+          cosign attest --yes --type cyclonedx --predicate sbom.json
+          "$IMAGE@${{ steps.build.outputs.digest }}"
+
+      - name: Generate SLSA build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+
+      - name: Verify signature, SBOM attestation and provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          IDENTITY="https://github.com/${GITHUB_REPOSITORY}/.github/workflows/supply-chain.yml@${GITHUB_REF}"
+          ISSUER="https://token.actions.githubusercontent.com"
+          {
+            echo "## cosign verify"
+            echo '```'
+            cosign verify "$IMAGE@$DIGEST" \
+              --certificate-identity "$IDENTITY" --certificate-oidc-issuer "$ISSUER" 2>&1
+            echo '```'
+            echo "## cosign verify-attestation (CycloneDX SBOM)"
+            echo '```'
+            cosign verify-attestation "$IMAGE@$DIGEST" --type cyclonedx \
+              --certificate-identity "$IDENTITY" --certificate-oidc-issuer "$ISSUER" 2>&1 >/dev/null
+            echo '```'
+            echo "## gh attestation verify (SLSA provenance)"
+            echo '```'
+            gh attestation verify "oci://$IMAGE@$DIGEST" --repo "$GITHUB_REPOSITORY" 2>&1
+            echo '```'
+            echo "SBOM components: $(jq '.components | length' sbom.json)"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
