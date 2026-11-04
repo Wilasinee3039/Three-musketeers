@@ -12,8 +12,10 @@
 | | Wilasinee Mangkorn — 6631503039 |
 | | Pirisa Kitichai — 6631503031 |
 | **Target application** | NoteVault |
-| **Repository URL** | [https://github.com/Wilasinee3039/Three-musketeers] |
+| **Repository URL** | [GitHub Repository](https://github.com/Wilasinee3039/Three-musketeers) |
+| **Presentation Video** | [Watch Demo Video (Google Drive)](https://drive.google.com/file/d/1CKpWEYWOKWCNODjpnpttaB-KDq7JG0sj/view?usp=sharing) |
 | **Date** | October 23, 2026 |
+
 
 ## AI-tool usage disclosure
 *Academic integrity: state how you used any AI tools (ChatGPT, Copilot, etc.) — e.g. searching, coding, translating, drafting. "None" is a valid answer.*
