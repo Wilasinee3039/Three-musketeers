@@ -128,7 +128,8 @@ The primary trust boundaries are between the user's browser and the application 
 | Location | `app.py` — `GET /api/notes/<nid>` |
 | Reproduction | 1. Start the NoteVault application and log in as Alice (`alice` / `alicepw`). 2. Visit `http://localhost:8080/api/notes/1` to access Alice's own note. 3. Change the note ID to `2` by visiting `http://localhost:8080/api/notes/2`. 4. Before the fix, the application returns the Admin's private note even though Alice is not its owner. |
 | Impact | An authenticated attacker can access private notes belonging to other users by manipulating note IDs, resulting in unauthorized disclosure of sensitive information. |
-| Evidence | [before-own-note](evidence/F-01-IDOR/before-own-note.png) and [before-admin-note](evidence/F-01-IDOR/before-admin-note.png) |
+| Evidence | before-own-note![alt text](evidence/F-01-IDOR/before-own-note.png)and before-admin-note ![alt text](evidence/F-01-IDOR/before-admin-note.png) |
+
 
 
 ---
@@ -142,7 +143,7 @@ The primary trust boundaries are between the user's browser and the application 
 | Location | `app.py` — `POST /login` and `GET /search` |
 | Reproduction | **Login:** 1. Open `http://localhost:8080/`. 2. Enter `' OR 1=1 -- ` as the username and `wrongpassword` as the password. 3. Submit the form. 4. Observe that authentication succeeds despite the incorrect credentials. **Search:** 1. Log in as `alice`. 2. Navigate to `/search`. 3. Enter `' OR 1=1 -- ` as the search term. 4. Observe that notes belonging to other users, including Admin, appear in the results. |
 | Impact | An attacker can bypass authentication and access notes belonging to other users, resulting in unauthorized access and disclosure of sensitive information. |
-| Evidence | [Before Login SQLi](evidence/F-02-SQLi/before-login-sqli.png) / [Before Search SQLi](evidence/F-02-SQLi/before-search-sqli.png) |
+| Evidence | Before Login SQLi ![alt text](evidence/F-02-SQLi/before-login-sqli.png)  / Before Search SQLi ![alt text](evidence/F-02-SQLi/before-search-sqli.png) |
 
 
 ---
@@ -156,7 +157,7 @@ The primary trust boundaries are between the user's browser and the application 
 | Location | `app.py` — `GET /export` |
 | Reproduction | 1. Log in as `alice` using `alicepw`. 2. Open `/export?fmt=txt` and observe `exporting notes as txt`. 3. Open `/export?fmt=txt%3Becho%20F03_INJECTION_TEST`. 4. Observe that `F03_INJECTION_TEST` appears on a separate line, proving that the injected shell command was executed. |
 | Impact | An authenticated attacker could execute arbitrary operating-system commands through the `fmt` parameter, potentially compromising the application container and exposing sensitive data. |
-| Evidence | [Before – Normal Export](evidence/F-03-Command-Injection/before-export-normal.png) / [Before – Command Injection](evidence/F-03-Command-Injection/before-export-command-injection.png) |
+| Evidence | Before – Normal Export ![alt text](evidence/F-03-Command-Injection/before-export-normal.png) / Before – Command Injection ![alt text](evidence/F-03-Command-Injection/before-export-command-injection.png) |
 
 
 
@@ -171,7 +172,7 @@ The primary trust boundaries are between the user's browser and the application 
 | Location | `app.py` — `POST /register` (role assignment) |
 | Reproduction | 1. Send a POST request to `/register` with `username=f04_test_admin`, `password=test12345`, and `role=admin`. 2. The application responds with HTTP 302, indicating registration was processed. 3. Query the SQLite database at `/tmp/notevault.db` for the newly created account. 4. Observe that the account has the `admin` role despite being created through public registration. |
 | Impact | An unauthenticated attacker can create an account with administrator privileges by supplying `role=admin` during registration. This allows privilege escalation and potentially unauthorized access to administrative functionality and sensitive user data. |
-| Evidence | [Before Fix – Admin Role Assignment](evidence/F-04-Mass-Assignment/before-register-admin.png) |
+| Evidence | Before Fix – Admin Role Assignment ![alt text](evidence/F-04-Mass-Assignment/before-register-admin.png) |
 
 ---
 
@@ -185,7 +186,7 @@ The primary trust boundaries are between the user's browser and the application 
 | Location | `app.py` — `GET /` (Home) and `GET /search` |
 | Reproduction | 1. Log in as `alice` using `alicepw`. 2. Create a note with title `F05 XSS Test` and body `<img src=x onerror=alert('F05_XSS_TEST')>`. 3. Return to the Home page and observe the JavaScript alert `F05_XSS_TEST`. 4. Search for `F05_XSS_TEST` and observe the same alert on the Search results page. |
 | Impact | An attacker can store malicious JavaScript in a note that executes when the note is rendered in a user's browser. This could enable unauthorized actions, manipulation of displayed content, or exposure of sensitive information accessible to the affected page. |
-| Evidence | [Before Fix – Home XSS](evidence/F-05-Stored-XSS/before-home-xss.png) / [Before Fix – Search XSS](evidence/F-05-Stored-XSS/before-search-xss.png) |
+| Evidence | Before Fix – Home XSS ![alt text](evidence/F-05-Stored-XSS/before-home-xss.png) / Before Fix – Search XSS ![alt text](evidence/F-05-Stored-XSS/before-search-xss.png) |
 
 
 
@@ -235,8 +236,8 @@ After applying the fix and rebuilding the application, the endpoint was tested a
 - `/api/notes/2` → Returns `{"error":"not found"}` instead of exposing the Admin's private note.
 
 **Evidence:**
-   - [after-own-note](evidence/F-01-IDOR/after-own-note.png)
-   - [after-admin-note](evidence/F-01-IDOR/after-admin-note.png)
+   - after-own-note ![alt text](evidence/F-01-IDOR/after-own-note.png)
+   - after-admin-note ![alt text](evidence/F-01-IDOR/after-admin-note.png)
 
 
 ---
@@ -267,8 +268,8 @@ After applying the fix and rebuilding the application, the endpoint was tested a
 - **Why this fixes it:** Parameterized queries separate user input from SQL commands. User-supplied values are treated as data rather than executable SQL, preventing authentication bypass and unauthorized data retrieval through SQL Injection.
 - **Commit:** `86f0990`-`fix(F-02): prevent SQL injection in login and search`
 - **Proof the exploit now fails:** The original login injection payload returns `login failed` (HTTP 401), while the search injection returns no unauthorized notes.
-  - [After Login SQLi](evidence/F-02-SQLi/after-login-sqli.png)
-  - [After Search SQLi](evidence/F-02-SQLi/after-search-sqli.png)
+  - After Login SQLi ![alt text](evidence/F-02-SQLi/after-login-sqli.png)
+  - After Search SQLi ![alt text](evidence/F-02-SQLi/after-search-sqli.png)
 
 
 ---
@@ -294,8 +295,8 @@ After applying the fix and rebuilding the application, the endpoint was tested a
 - **Why this fixes it:** The fix removes `shell=True` to prevent shell command execution and uses a list of arguments instead of concatenating user input into a command string. A strict whitelist only allows `txt`, `csv`, and `json` as valid export formats, preventing command injection through the `fmt` parameter.
 - **Commit:** `2babb04`-`fix(F-03): prevent command injection in export`
 - **Proof the exploit now fails:** The original payload `txt;echo F03_INJECTION_TEST` is rejected with `invalid export format`, while normal export functionality remains operational. 
-   - [After Fix – Command Injection](evidence/F-03-Command-Injection/after-export-command-injection.png) 
-   - [After Fix – Normal Export](evidence/F-03-Command-Injection/after-export-normal.png)
+   - After Fix – Command Injection ![alt text](evidence/F-03-Command-Injection/after-export-command-injection.png)
+   - After Fix – Normal Export ![alt text](evidence/F-03-Command-Injection/after-export-normal.png)
 
 
 ---
@@ -311,7 +312,7 @@ After applying the fix and rebuilding the application, the endpoint was tested a
 - **Why this fixes it:** The application no longer accepts the `role` value from user-controlled registration data. Every newly registered account is assigned the `user` role, preventing attackers from granting themselves administrator privileges through mass assignment.
 - **Commit:** `474a0f5`-`fix(F-04): prevent mass assignment in registration`
 - **Proof the exploit now fails:** The same registration request containing `role=admin` was submitted after remediation. The application created the account with the `user` role instead of `admin`, confirming that privilege escalation through the registration parameter is prevented. 
-   - [After Fix – User Role Enforced](evidence/F-04-Mass-Assignment/after-register-admin.png)
+   - After Fix – User Role Enforced ![alt text](evidence/F-04-Mass-Assignment/after-register-admin.png)
 
 
 ---
@@ -353,8 +354,10 @@ After applying the fix and rebuilding the application, the endpoint was tested a
 - **Why this fixes it:** The application now uses `markupsafe.escape()` to HTML-escape note titles and bodies before rendering them on the Home and Search pages. This ensures that user-controlled HTML and JavaScript payloads are displayed as text rather than interpreted and executed by the browser.
 - **Commit:** `bf24736`-`fix(F-05): prevent stored XSS in notes and search`
 - **Proof the exploit now fails:** After remediation, the original stored XSS payload `<img src=x onerror=alert('F05_XSS_TEST')>` was tested again on both pages. The payload was displayed as plain text, and no JavaScript alert appeared.
-  - [After Fix – Home XSS](evidence/F-05-Stored-XSS/after-home-xss.png)
-  - [After Fix – Search XSS](evidence/F-05-Stored-XSS/after-search-xss.png)
+  - After Fix – Home XSS ![alt text](evidence/F-05-Stored-XSS/after-home-xss.png)
+  - After Fix – Search XSS ![alt text](evidence/F-05-Stored-XSS/after-search-xss.png)
+
+---  
 
 ### Additional hardening (found by Security CI)
 
