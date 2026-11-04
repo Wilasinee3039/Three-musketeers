@@ -20,7 +20,7 @@ This project focuses on analyzing security threats, identifying vulnerabilities,
 
 ## Presentation & Demo Video
 
-**Video:** [Watch Our Security Demo (Google Drive)](https://drive.google.com/file/d/1CKpWEYWOKWCNODjpnpttaB-KDq7JG0sj/view?usp=sharing)
+**Video:** [Watch Our Security Presentation(Google Drive)](https://drive.google.com/file/d/1CKpWEYWOKWCNODjpnpttaB-KDq7JG0sj/view?usp=sharing)
 
 The video demonstrates the identified vulnerabilities, their root causes, remediation steps, and security testing results.
 
