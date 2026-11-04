@@ -1,3 +1,4 @@
+
 # Three-musketeers
 # Term Project — Secure Build
 
@@ -17,6 +18,12 @@
 
 This project focuses on analyzing security threats, identifying vulnerabilities, and implementing security improvements in the NoteVault web application.
 
+## Presentation & Demo Video
+
+**Video:** [Watch Our Security Demo (Google Drive)](https://drive.google.com/file/d/1CKpWEYWOKWCNODjpnpttaB-KDq7JG0sj/view?usp=sharing)
+
+The video demonstrates the identified vulnerabilities, their root causes, remediation steps, and security testing results.
+
 ## Project Status
 
 - [x] Team Formation
@@ -25,4 +32,4 @@ This project focuses on analyzing security threats, identifying vulnerabilities,
 - [x] Vulnerability Assessment
 - [x] Security Remediation
 - [x] Security CI & Supply-Chain Hardening
-- [ ] Final Report & Demo
+- [x] Final Report & Demo
